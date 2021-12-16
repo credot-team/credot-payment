@@ -1,0 +1,31 @@
+import { PaidResult as IPaidResult, PaidResultOptions, PayInfo } from '../PaidResult';
+import { OrderStatus } from '../OrderStatus';
+import { PaidResultFields } from './PaidResultFields';
+import { AcceptMethods } from './Configuration';
+export declare class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true, unknown>> {
+    poweredBy(): string;
+    private _payInfo;
+    private readonly _result;
+    private readonly _isValid;
+    private readonly _finishedAt;
+    private readonly _isSucceed;
+    private readonly _status;
+    constructor(result: PaidResultFields<false, AcceptMethods>, options: PaidResultOptions<AcceptMethods>);
+    parse(): void;
+    static decryptTradeInfo(tradeInfo: string): string;
+    static hashTradeInfo(tradeInfo: string): string;
+    merchantId(): string;
+    merchantName(): string | undefined;
+    isPaid(): boolean;
+    payInfo(): PayInfo;
+    amount(): string;
+    finishedAt(): Date;
+    status(): OrderStatus;
+    isFromBrowser(): boolean;
+    applyNo(): string;
+    orderNo(): string;
+    errorCode(): string | null;
+    errorMessage(): string | null;
+    isValid(): boolean;
+    successResponse(): string | undefined;
+}
