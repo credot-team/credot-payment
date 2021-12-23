@@ -5,7 +5,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 import { PoweredBy } from './index';
 import {
-  CreateFunction,
+  CustomFieldsType,
+  HtmlFormPostParams,
   OrderApplyResult,
   PaidOrder as IPaidOrder,
   PaidOrderParams,
@@ -15,6 +16,7 @@ import { PaidOrderFields } from './PaidOrderFields';
 import { PaidResult } from './PaidResult';
 import { configuration } from './Configuration';
 import { isEmpty } from '../../utils/convert';
+import { Locales } from '../Locales';
 
 dayjs.extend(customParseFormat);
 
@@ -24,46 +26,36 @@ type IncludeAnyOne<T, U> = (Extract<keyof T, keyof U> extends never
   : T) &
   U;
 
-interface CustomFields {
-  term: PaidOrderFields['Term'];
+interface CustomFields extends CustomFieldsType {
+  installment: PaidOrderFields['Term'];
+  locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
 
-export const create: CreateFunction<CustomFields> = (payMethod, params) => {
-  return new PaidOrder<typeof payMethod>(payMethod, params);
-};
+type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst;
 
-export class PaidOrder<P extends PayMethods> extends IPaidOrder<P, CustomFields> {
-  private readonly _payMethod: P;
-  private readonly _term: PaidOrderFields['Term'];
-  private readonly _orderNo: string;
-  private readonly _orderInfo: string;
-  private readonly _amount: number;
-  private readonly _userName: string;
-  private readonly _userPhone: string;
-  private readonly _userEmail: string;
-  private readonly _memo: string | null | undefined;
+//=============================
+// End of Types
+//=============================
+
+export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
+  AcceptMethods,
+  CustomFields
+> {
   private readonly _checksum: string;
 
-  /**
-   *
-   * @param payMethod
-   * @param params 訂單資訊
-   */
-  constructor(payMethod: P, params: PaidOrderParams<P, CustomFields>) {
+  constructor(
+    payMethod: EnableMethods | EnableMethods[],
+    params: PaidOrderParams<EnableMethods, CustomFields>,
+  ) {
     super(payMethod, params);
-    this._payMethod = params.payMethod;
-    this._term = params.term ?? '';
-    this._orderNo = params.orderNo;
-    this._orderInfo = params.orderInfo;
-    this._amount = params.amount;
-    this._userName = params.userName;
-    this._userPhone = params.userPhone;
-    this._userEmail = params.userEmail;
-    this._memo = params.memo ?? '';
 
     const env = configuration.getEnvParams();
+    const _params = this.params;
     this._checksum = sha1(
-      env.merchantId[PayMethods.Credit] + env.transPassword + this._amount + this._term,
+      env.merchantId[PayMethods.Credit] +
+        env.transPassword +
+        _params.amount +
+        (_params.installment ?? ''),
     )
       .toString()
       .toUpperCase();
@@ -73,57 +65,51 @@ export class PaidOrder<P extends PayMethods> extends IPaidOrder<P, CustomFields>
     return PoweredBy;
   }
 
-  payMethod(): PayMethods {
-    return this._payMethod;
-  }
-
-  orderNo(): string {
-    return this._orderNo;
-  }
-
-  amount(): string {
-    return this._amount.toString();
-  }
-
   checksum(): string {
     return this._checksum;
   }
 
   apply(): Promise<OrderApplyResult> {
     const env = configuration.getEnvParams();
-    const params: PaidOrderFields = {
+    const params = this.params;
+
+    const args: PaidOrderFields = {
       web: env.merchantId[PayMethods.Credit],
-      MN: this._amount.toString(),
-      Td: this._orderNo,
-      OrderInfo: this._orderInfo,
-      sna: this._userName,
-      sdt: this._userPhone,
-      email: this._userEmail,
-      note1: this._memo ?? undefined,
+      MN: params.amount.toString(),
+      Td: params.orderNo,
+      OrderInfo: params.orderInfo,
+      sna: params.userName,
+      sdt: params.userPhone,
+      email: params.userEmail,
+      note1: params.memo ?? undefined,
       note2: undefined,
       Card_Type: '0',
-      Country_Type: '',
-      Term: '',
-      ChkValue: this._checksum,
+      Country_Type:
+        params.locale === Locales.en_US ? 'EN' : params.locale === Locales.ja ? 'JIS' : '',
+      Term: params.installment,
+      ChkValue: this.checksum(),
     };
 
-    const data = {
-      $method: 'POST',
-      $url: env.paymentApiHost + '/Etopm.aspx',
-
-      web: params.web,
-      MN: params.MN,
-      OrderInfo: params.OrderInfo,
-      Td: params.Td,
-      sna: encodeURIComponent(params.sna),
-      sdt: params.sdt,
-      email: params.email,
-      note1: encodeURIComponent(params.note1 ?? ''),
-      note2: encodeURIComponent(params.note2 ?? ''),
-      Card_Type: params.Card_Type,
-      Country_Type: params.Country_Type,
-      Term: params.Term,
-      ChkValue: params.ChkValue,
+    const data: HtmlFormPostParams = {
+      properties: {
+        method: 'post',
+        url: env.paymentApiHost + '/Etopm.aspx',
+      },
+      data: {
+        web: args.web,
+        MN: args.MN,
+        OrderInfo: args.OrderInfo,
+        Td: args.Td,
+        sna: encodeURIComponent(args.sna),
+        sdt: args.sdt,
+        email: args.email,
+        note1: encodeURIComponent(args.note1 ?? ''),
+        note2: encodeURIComponent(args.note2 ?? ''),
+        Card_Type: args.Card_Type,
+        Country_Type: args.Country_Type,
+        Term: args.Term,
+        ChkValue: args.ChkValue,
+      },
     };
     return Promise.resolve({ method: 'json', payload: data });
   }

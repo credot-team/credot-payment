@@ -5,6 +5,21 @@ export enum PayMethods {
   Credit = 'credit',
 
   /**
+   * 信用卡分期
+   */
+  CreditInst = 'credit-installment',
+
+  /**
+   * 信用卡紅利
+   */
+  CreditReward = 'credit-reward',
+
+  /**
+   * 銀聯卡
+   */
+  UnionPay = 'union-pay',
+
+  /**
    * WebATM
    */
   WebATM = 'web-atm',
@@ -45,14 +60,14 @@ export enum PayMethods {
   CVS = 'cvs',
 
   /**
+   * 超商條碼繳費
+   */
+  CVSBarcode = 'cvs-barcode',
+
+  /**
    * ATM 轉帳
    */
   VACC = 'vacc',
-
-  /**
-   * 超商條碼繳費
-   */
-  Barcode = 'barcode',
 
   /**
    * 超商取貨付款
@@ -63,4 +78,21 @@ export enum PayMethods {
    * 支付寶
    */
   Alipay = 'alipay',
+}
+
+export enum CVSCOM_Types {
+  /**
+   * 取貨付款
+   */
+  PickupAndPay,
+
+  /**
+   * 取貨不付款
+   */
+  PickupWithoutPay,
+
+  /**
+   * 取貨付款 或 取貨不付款
+   */
+  Both,
 }

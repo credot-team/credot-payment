@@ -33,7 +33,7 @@ export interface PaidOrderFields {
    *
    * 將交易資料參數（下方列表中參數）透過商店 Key 及 IV 進行 AES 加密。
    */
-  TradeInfo: TradeInfo;
+  TradeInfo: TradeInfo | string;
 
   /**
    * 交易資料 SHA256 加密
@@ -53,7 +53,7 @@ export interface PaidOrderFields {
 /**
  * 交易資料
  */
-type TradeInfo = {
+export type TradeInfo = {
   /**
    * 商店代號
    *
@@ -419,7 +419,7 @@ type TradeInfo = {
    * 當未提供此參數時表示不啟用。
    */
   CVSCOM?: 0 | 1 | 2 | 3;
-} & AliPayFields &
+} & Partial<AliPayFields> &
   NTCBFields &
   Partial<CreditToken>;
 

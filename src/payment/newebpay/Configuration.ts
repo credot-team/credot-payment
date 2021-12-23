@@ -2,7 +2,7 @@ import { Configuration } from '../Configuration';
 
 interface NewebpayEnvironmentParameters {
   //付款API host
-  paymentApiHost: string;
+  paymentApiUrl: string;
 
   //商家代號
   merchantId: string;

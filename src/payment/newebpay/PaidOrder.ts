@@ -1,55 +1,134 @@
 import CryptoJS, { AES, SHA256 } from 'crypto-js';
+import { CVSCOM_Types, PayMethods } from '../PayMethods';
+import { PoweredBy } from './';
+import { PaidOrderFields, TradeInfo } from './PaidOrderFields';
+import { configuration } from './Configuration';
 import {
-  CreateFunction,
+  CustomFieldsType,
+  HtmlFormPostParams,
   OrderApplyResult,
   PaidOrder as IPaidOrder,
   PaidOrderParams,
 } from '../PaidOrder';
-import { PayMethods } from '../PayMethods';
-import { PaidOrderFields, PoweredBy } from './';
-import { configuration } from './Configuration';
+import { Locales } from '../Locales';
 
-interface CustomFields {
-  term: PaidOrderFields['TradeInfo']['InstFlag'];
+interface CustomFields extends CustomFieldsType {
+  installment: TradeInfo['InstFlag'];
+  locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
 
-export const create: CreateFunction<CustomFields> = (payMethod, params) => {
-  return new PaidOrder<typeof payMethod>(payMethod, params);
-};
+type AllAcceptMethods =
+  | PayMethods.Credit
+  | PayMethods.GooglePay
+  | PayMethods.SamsungPay
+  | PayMethods.LinePay
+  | PayMethods.CreditReward
+  | PayMethods.UnionPay
+  | PayMethods.WebATM
+  | PayMethods.VACC
+  | PayMethods.CVS
+  | PayMethods.CVSBarcode
+  | PayMethods.ezPay
+  | PayMethods.EsunWallet
+  | PayMethods.TaiwanPay
+  | PayMethods.CVSCOM;
 
-export class PaidOrder<P extends PayMethods> extends IPaidOrder<P, CustomFields> {
-  private readonly _payMethod: PayMethods;
-  private readonly _term: CustomFields['term'];
-  private readonly _orderNo: string;
-  private readonly _orderInfo: string;
-  private readonly _amount: number;
-  private readonly _userName: string;
-  private readonly _userPhone: string;
-  private readonly _userEmail: string;
-  private readonly _memo: string | null | undefined;
-  private readonly _checksum: string;
+//===================================
+// End of Types
+//===================================
+
+export class PaidOrder<EnableMethods extends AllAcceptMethods> extends IPaidOrder<
+  AllAcceptMethods,
+  CustomFields
+> {
+  private _tradeInfo: TradeInfo | undefined;
+  private _apiParams: PaidOrderFields | undefined;
 
   /**
    *
    * @param payMethod
    * @param params 訂單資訊
    */
-  constructor(payMethod: P, params: PaidOrderParams<P, CustomFields>) {
+  constructor(
+    payMethod: EnableMethods | EnableMethods[],
+    params: PaidOrderParams<EnableMethods, CustomFields>,
+  ) {
     super(payMethod, params);
-    this._payMethod = params.payMethod;
-    this._term = params.term ?? undefined;
-    this._orderNo = params.orderNo;
-    this._orderInfo = params.orderInfo;
-    this._amount = params.amount;
-    this._userName = params.userName;
-    this._userPhone = params.userPhone;
-    this._userEmail = params.userEmail;
-    this._memo = params.memo ?? '';
-
-    this._checksum = '';
+    this.parseTradeInfo();
   }
 
-  static encryptTradeInfo(tradeInfo: object) {
+  parseTradeInfo() {
+    const payMethods = this.payMethod();
+    const params = this.params;
+    const env = configuration.getEnvParams();
+
+    const langType: TradeInfo['LangType'] =
+      params.locale === Locales.en_US ? 'en' : params.locale === Locales.ja ? 'jp' : 'zh-tw';
+
+    const args: TradeInfo = {
+      MerchantID: env.merchantId,
+      LoginType: 0,
+      Email: params.userEmail,
+      MerchantOrderNo: params.orderNo,
+      ItemDesc: params.orderInfo,
+      Amt: params.amount,
+      TimeStamp: (Date.now() / 1000).toFixed(0),
+      TradeLimit: params.timeLimit,
+      LangType: langType,
+      EmailModify: params.userEmailModify ? 1 : 0,
+      ReturnURL: '',
+      NotifyURL: '',
+      CustomerURL: undefined,
+      ClientBackURL: undefined,
+      RespondType: 'JSON',
+      Version: '1.6',
+
+      CREDIT: payMethods.includes(PayMethods.Credit) ? 1 : 0,
+      ANDROIDPAY: payMethods.includes(PayMethods.GooglePay) ? 1 : 0,
+      SAMSUNGPAY: payMethods.includes(PayMethods.SamsungPay) ? 1 : 0,
+      LINEPAY: payMethods.includes(PayMethods.LinePay) ? 1 : 0,
+      CreditRed: payMethods.includes(PayMethods.CreditReward) ? 1 : 0,
+      UNIONPAY: payMethods.includes(PayMethods.UnionPay) ? 1 : 0,
+      WEBATM: payMethods.includes(PayMethods.WebATM) ? 1 : 0,
+      VACC: payMethods.includes(PayMethods.VACC) ? 1 : 0,
+      CVS: payMethods.includes(PayMethods.CVS) ? 1 : 0,
+      BARCODE: payMethods.includes(PayMethods.CVSBarcode) ? 1 : 0,
+      P2G: payMethods.includes(PayMethods.ezPay) ? 1 : 0,
+      ESUNWALLET: payMethods.includes(PayMethods.EsunWallet) ? 1 : 0,
+      TAIWANPAY: payMethods.includes(PayMethods.TaiwanPay) ? 1 : 0,
+      CVSCOM: payMethods.includes(PayMethods.CVSCOM) ? 1 : 0,
+    };
+
+    for (const payMethod of payMethods) {
+      switch (payMethod) {
+        case PayMethods.LinePay:
+          args.ImageUrl = params.linePay?.imageUrl;
+          break;
+        case PayMethods.CreditInst:
+          args.InstFlag = params.installment;
+          break;
+        case PayMethods.CVSCOM:
+          if (!params.cvscom) break;
+          args.CVSCOM = (<Record<any, 1 | 2 | 3>>{
+            [CVSCOM_Types.PickupAndPay]: 1,
+            [CVSCOM_Types.PickupWithoutPay]: 2,
+            [CVSCOM_Types.Both]: 3,
+          })[params.cvscom.type];
+          break;
+      }
+    }
+
+    const encryptedTradeInfo = PaidOrder.encryptTradeInfo(args);
+    this._apiParams = {
+      TradeInfo: encryptedTradeInfo,
+      TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo),
+      MerchantID: env.merchantId,
+      Version: '1.6',
+    };
+    this._tradeInfo = args;
+  }
+
+  static encryptTradeInfo(tradeInfo: TradeInfo) {
     const env = configuration.getEnvParams();
     const qs = new URLSearchParams(tradeInfo as any).toString();
     return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(env.hashKey), {
@@ -83,23 +162,19 @@ export class PaidOrder<P extends PayMethods> extends IPaidOrder<P, CustomFields>
     return PoweredBy;
   }
 
-  payMethod(): PayMethods {
-    return this._payMethod;
-  }
-
-  orderNo(): string {
-    return this._orderNo;
-  }
-
-  amount(): string {
-    return this._amount.toString();
-  }
-
   checksum(): string {
-    return this._checksum;
+    return this._apiParams!.TradeSha;
   }
 
   apply(): Promise<OrderApplyResult> {
-    return {} as any;
+    const env = configuration.getEnvParams();
+    const data: HtmlFormPostParams = {
+      properties: {
+        method: 'post',
+        url: env.paymentApiUrl,
+      },
+      data: this._apiParams!,
+    };
+    return Promise.resolve({ method: 'json', payload: data });
   }
 }

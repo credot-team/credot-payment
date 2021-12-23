@@ -1,4 +1,13 @@
-import { PayMethods } from './PayMethods';
+import { CVSCOM_Types, PayMethods } from './PayMethods';
+import { Locales } from './Locales';
+
+export interface HtmlFormPostParams {
+  properties: {
+    method: 'get' | 'post';
+    url: string;
+  };
+  data: Record<string, any>;
+}
 
 export interface OrderApplyResult {
   method: 'redirect' | 'page' | 'json';
@@ -7,17 +16,33 @@ export interface OrderApplyResult {
 
 export interface CustomFieldsType {
   // 信用卡分期
-  term: any;
+  installment?: any;
+  // 語言
+  locale?: Locales;
+  // 限制交易時長(秒)
+  timeLimit?: number;
+  // 開放修改信箱地址
+  userEmailModify?: boolean;
 }
 
-export type CreateFunction<C extends CustomFieldsType> = <P extends PayMethods>(
-  payMethod: P,
-  params: PaidOrderParams<P, C>,
-) => PaidOrder<P, C>;
+/**
+ * LinePay 參數
+ */
+type LinePayParameters = {
+  imageUrl: string;
+};
 
-export type PaidOrderParams<P extends PayMethods, C extends CustomFieldsType> = {
-  // 付款方式
-  payMethod: P;
+/**
+ * 超商物流 參數
+ */
+type CVSCOMParameters = {
+  type: CVSCOM_Types;
+};
+
+/**
+ * 訂單資訊
+ */
+export type PaidOrderParams<AcceptMethods extends PayMethods, Custom extends CustomFieldsType> = {
   // 訂單號
   orderNo: string;
   // 訂單內容
@@ -32,18 +57,56 @@ export type PaidOrderParams<P extends PayMethods, C extends CustomFieldsType> = 
   userEmail: string;
   // 備註
   memo?: string;
-} & C;
+  // 語言
+  locale?: Custom['locale'];
+  // 限制交易時長(秒)
+  timeLimit?: Custom['timeLimit'];
+  // 開放修改信箱地址
+  userEmailModify?: Custom['userEmailModify'];
+  // 信用卡分期
+  installment?: AcceptMethods extends PayMethods.CreditInst ? Custom['installment'] : undefined;
+  // linePay
+  linePay?: AcceptMethods extends PayMethods.LinePay ? LinePayParameters : undefined;
+  // 超商物流
+  cvscom?: AcceptMethods extends PayMethods.CVSCOM ? CVSCOMParameters : undefined;
+};
 
-export abstract class PaidOrder<PayMethod extends PayMethods, Custom extends CustomFieldsType> {
-  protected constructor(payMethod: PayMethod, params: PaidOrderParams<PayMethod, Custom>) {}
+/**
+ * 付款訂單
+ */
+export abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends CustomFieldsType> {
+  private readonly _payMethods: AcceptMethods[];
+  private readonly _params: PaidOrderParams<AcceptMethods, Custom>;
+  get params(): PaidOrderParams<AcceptMethods, Custom> {
+    return this._params;
+  }
+
+  /**
+   *
+   * @param payMethod
+   * @param params 訂單資訊
+   */
+  protected constructor(
+    payMethod: AcceptMethods | AcceptMethods[],
+    params: PaidOrderParams<AcceptMethods, Custom>,
+  ) {
+    this._payMethods = Array.isArray(payMethod) ? payMethod : [payMethod];
+    this._params = { ...params };
+  }
 
   abstract poweredBy(): string;
 
-  abstract payMethod(): PayMethods;
+  payMethod(): PayMethods[] {
+    return this._payMethods;
+  }
 
-  abstract orderNo(): string;
+  orderNo(): string {
+    return this._params.orderNo;
+  }
 
-  abstract amount(): string;
+  amount(): number {
+    return this._params.amount;
+  }
 
   abstract checksum(): string;
 
