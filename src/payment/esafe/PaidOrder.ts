@@ -3,7 +3,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-import { PoweredBy } from './index';
+import { isEmpty } from '../../utils/convert';
 import {
   CustomFieldsType,
   HtmlFormPostParams,
@@ -12,11 +12,11 @@ import {
   PaidOrderParams,
 } from '../PaidOrder';
 import { PayMethods } from '../PayMethods';
+import { Locales } from '../Locales';
+import { PoweredBy } from './';
 import { PaidOrderFields } from './PaidOrderFields';
 import { PaidResult } from './PaidResult';
-import { configuration } from './Configuration';
-import { isEmpty } from '../../utils/convert';
-import { Locales } from '../Locales';
+import { AcceptMethods, configuration } from './Configuration';
 
 dayjs.extend(customParseFormat);
 
@@ -30,8 +30,6 @@ interface CustomFields extends CustomFieldsType {
   installment: PaidOrderFields['Term'];
   locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
-
-type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst;
 
 //=============================
 // End of Types
@@ -145,7 +143,6 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
         if (fields.length < 2) reject(new Error(result.data));
 
         return new PaidResult(
-          PayMethods.Credit,
           {
             web: fields[0],
             buysafeno: fields[1],
@@ -156,7 +153,10 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
             ChkValue: fields[7],
             Name: '',
           },
-          dayjs(fields[3], 'YYYYMMDDHHmm').toDate(),
+          {
+            payMethod: PayMethods.Credit,
+            finishedAt: dayjs(fields[3], 'YYYYMMDDHHmm').toDate(),
+          },
         );
       });
       resolve(paidResults);

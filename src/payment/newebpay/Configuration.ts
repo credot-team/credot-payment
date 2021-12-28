@@ -1,11 +1,35 @@
 import { Configuration } from '../Configuration';
+import { PayMethods } from '../PayMethods';
+
+export type AcceptMethods =
+  | PayMethods.Credit
+  | PayMethods.CreditInst
+  | PayMethods.CreditReward
+  | PayMethods.GooglePay
+  | PayMethods.SamsungPay
+  | PayMethods.LinePay
+  | PayMethods.UnionPay
+  | PayMethods.WebATM
+  | PayMethods.VACC
+  | PayMethods.CVS
+  | PayMethods.CVSBarcode
+  | PayMethods.ezPay
+  | PayMethods.EsunWallet
+  | PayMethods.TaiwanPay
+  | PayMethods.CVSCOM;
 
 interface NewebpayEnvironmentParameters {
-  //付款API host
+  // 付款API host
   paymentApiUrl: string;
 
-  //商家代號
+  // 商家代號
   merchantId: string;
+
+  // 交易完成後通知地址
+  notifyUrl?: string;
+
+  // 交易完成後前端導向地址
+  returnUrl?: string;
 
   // HashKey
   hashKey: string;

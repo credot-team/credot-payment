@@ -1,7 +1,8 @@
-import { CreditType, PaymentMethods } from './PaymentMethod';
+import { CreditType, PaymentTypes } from './PaymentMethod';
 import { AuthBanks } from './AuthBanks';
+import { PayMethods } from '../PayMethods';
 
-type KeyofPaymentMethods = keyof typeof PaymentMethods;
+type KeyofPaymentTypes = keyof typeof PaymentTypes;
 
 /**
  * @version v1.1.1
@@ -11,7 +12,7 @@ type KeyofPaymentMethods = keyof typeof PaymentMethods;
  *
  * 技術文件連結: {@link https://www.newebpay.com/website/Page/download_file?name=Newebpay_MPG_1.1.1.pdf}
  */
-export interface PaidResultFields<Type extends KeyofPaymentMethods> {
+export interface PaidResultFields<Decoded extends boolean, PayMethod extends PayMethods | unknown> {
   /**
    * 回傳狀態
    *
@@ -34,7 +35,7 @@ export interface PaidResultFields<Type extends KeyofPaymentMethods> {
    *
    * 範例請參考九、交易資料 AES 加解密
    */
-  TradeInfo: TradeInfo<Type>;
+  TradeInfo: Decoded extends true ? TradeInfo<PayMethod> : string;
 
   /**
    * 交易資料 SHA256 加密
@@ -51,7 +52,7 @@ export interface PaidResultFields<Type extends KeyofPaymentMethods> {
   Version: string;
 }
 
-type TradeInfo<Type extends KeyofPaymentMethods> = {
+type TradeInfo<PayMethod extends PayMethods | unknown> = {
   /**
    * 回傳狀態
    *
@@ -74,32 +75,45 @@ type TradeInfo<Type extends KeyofPaymentMethods> = {
    *
    * 當 RespondType 為 JSON 時，回傳參數會放至此;
    */
-  Result: Result<Type>;
+  Result: Result<PayMethod>;
 };
 
 /**
  * 回傳參數，根據提供的泛型型別決定不同付款方式的資料欄位
  */
-type Result<Type extends KeyofPaymentMethods> = GeneralFields &
-  (Type extends 'CREDIT'
+type Result<PayMethod extends PayMethods | unknown> = GeneralFields &
+  (PayMethod extends
+    | PayMethods.Credit
+    | PayMethods.CreditInst
+    | PayMethods.CreditReward
+    | PayMethods.SamsungPay
+    | PayMethods.GooglePay
+    | PayMethods.UnionPay
     ? CreditCardFields
-    : Type extends 'WEBATM' | 'VACC'
+    : PayMethod extends PayMethods.WebATM | PayMethods.VACC
     ? ATMFields
-    : Type extends 'CVS'
+    : PayMethod extends PayMethods.CVS
     ? CVSCodeFields
-    : Type extends 'BARCODE'
+    : PayMethod extends PayMethods.CVSBarcode
     ? CVSBarcodeFields
-    : Type extends 'P2GEACC'
+    : PayMethod extends PayMethods.ezPay
     ? ezPayFields
-    : Type extends 'CVSCOM'
+    : PayMethod extends PayMethods.CVSCOM
     ? CVSCOMFields
-    : Type extends 'ALIPAY'
+    : PayMethod extends PayMethods.Alipay
     ? AlipayFields
-    : Type extends 'ESUNWALLET'
+    : PayMethod extends PayMethods.EsunWallet
     ? EsunWalletFields
-    : Type extends 'TAIWANPAY'
+    : PayMethod extends PayMethods.TaiwanPay
     ? TaiwanPayFields
-    : never);
+    : Partial<CreditCardFields> &
+        Partial<CVSCodeFields> &
+        Partial<CVSBarcodeFields> &
+        Partial<ezPayFields> &
+        Partial<CVSCOMFields> &
+        Partial<AlipayFields> &
+        Partial<EsunWalletFields> &
+        Partial<TaiwanPayFields>);
 
 /**
  * 所有支付方式共同回傳參數
@@ -132,7 +146,7 @@ type GeneralFields = {
   /**
    * 支付方式 (請參考 附件一)
    */
-  PaymentType: string;
+  PaymentType: KeyofPaymentTypes;
 
   /**
    * 回傳格式
@@ -146,7 +160,7 @@ type GeneralFields = {
    *
    * 回傳格式為：2014-06-25 16:43:49
    */
-  PayTime: string;
+  PayTime?: string;
 
   /**
    * 交易 IP
@@ -385,7 +399,7 @@ type CVSBarcodeFields = {
    * - OK = OK 超商
    * - HILIFE = 萊爾富
    */
-  PayStore: string;
+  PayStore: 'SEVEN' | 'FAMILY' | 'OK' | 'HILIFE';
 };
 
 /**
@@ -404,7 +418,7 @@ type ezPayFields = {
    *
    * 可參考 附件一。但前面會為 P2G_ 開頭
    */
-  P2GPaymentType: 'P2GEACC' | `P2G_${keyof Omit<typeof PaymentMethods, 'P2GEACC'>}`;
+  P2GPaymentType: 'P2GEACC' | `P2G_${keyof Omit<typeof PaymentTypes, 'P2GEACC'>}`;
 
   /**
    * ezPay 交易金額 (新台幣)

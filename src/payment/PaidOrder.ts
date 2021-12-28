@@ -57,6 +57,12 @@ export type PaidOrderParams<AcceptMethods extends PayMethods, Custom extends Cus
   userEmail: string;
   // 備註
   memo?: string;
+  // 交易完成後通知地址
+  notifyUrl?: string;
+  // 交易完成後前端導向地址
+  returnUrl?: string;
+  // 返回上一頁地址
+  backUrl?: string;
   // 語言
   locale?: Custom['locale'];
   // 限制交易時長(秒)
@@ -97,7 +103,7 @@ export abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends
   abstract poweredBy(): string;
 
   payMethod(): PayMethods[] {
-    return this._payMethods;
+    return [...this._payMethods];
   }
 
   orderNo(): string {

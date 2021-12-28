@@ -1,58 +1,60 @@
-export const PaymentMethods = {
+import { PayMethods } from '../PayMethods';
+
+export const PaymentTypes = {
   /**
    * 信用卡
    */
-  CREDIT: '信用卡',
+  CREDIT: PayMethods.Credit,
 
   /**
    * WebATM
    */
-  WEBATM: 'WebATM',
+  WEBATM: PayMethods.WebATM,
 
   /**
    * ATM 轉帳
    */
-  VACC: 'ATM 轉帳',
+  VACC: PayMethods.VACC,
 
   /**
    * 超商代碼繳費
    */
-  CVS: '超商代碼繳費',
+  CVS: PayMethods.CVS,
 
   /**
    * 超商條碼繳費
    */
-  BARCODE: '超商條碼繳費',
+  BARCODE: PayMethods.CVSBarcode,
 
   /**
    * 超商取貨付款
    */
-  CVSCOM: '超商取貨付款',
+  CVSCOM: PayMethods.CVSCOM,
 
   /**
    * 支付寶
    */
-  ALIPAY: '支付寶',
+  ALIPAY: PayMethods.Alipay,
 
   /**
    * ezPay 電子錢包
    */
-  P2GEACC: 'ezPay 電子錢包',
+  P2GEACC: PayMethods.ezPay,
 
   /**
    * LINE Pay
    */
-  LINEPAY: 'LINE Pay',
+  LINEPAY: PayMethods.LinePay,
 
   /**
    * 玉山 Wallet
    */
-  ESUNWALLET: '玉山 Wallet',
+  ESUNWALLET: PayMethods.EsunWallet,
 
   /**
    * 台灣 Pay
    */
-  TAIWANPAY: '台灣 Pay',
+  TAIWANPAY: PayMethods.TaiwanPay,
 };
 
 export const CreditType = {

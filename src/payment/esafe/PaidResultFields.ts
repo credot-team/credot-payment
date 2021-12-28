@@ -209,6 +209,16 @@ export interface PaidResultFields {
   InvoiceNo?: string;
 
   /**
+   * 日期格式： YYYYMMDD，例如 20170824
+   */
+  PayDate?: string;
+
+  /**
+   * 時間格式：HHMM，例如 1530
+   */
+  PayTime?: string;
+
+  /**
    * 交易檢查碼
    *
    * 請參考金流串接技術手冊

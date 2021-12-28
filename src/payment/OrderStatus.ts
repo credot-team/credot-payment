@@ -5,6 +5,16 @@ export enum OrderStatus {
   success,
 
   /**
+   * 錯誤
+   */
+  error,
+
+  /**
+   * 交易失敗
+   */
+  failed,
+
+  /**
    * 取消交易
    */
   canceled,

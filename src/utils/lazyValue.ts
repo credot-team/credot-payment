@@ -1,8 +1,9 @@
 const UNDEFINED = Symbol.for('UNDEFINED');
 
-type LazyValue<T> = (() => T) & {
+interface LazyValue<T> {
+  (): T;
   drop(): void;
-};
+}
 
 function lazyValue<T extends () => any>(this: any, initializer: T): LazyValue<ReturnType<T>> {
   let value: ReturnType<T> = UNDEFINED as any;

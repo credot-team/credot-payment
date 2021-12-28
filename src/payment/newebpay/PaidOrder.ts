@@ -1,8 +1,5 @@
 import CryptoJS, { AES, SHA256 } from 'crypto-js';
-import { CVSCOM_Types, PayMethods } from '../PayMethods';
-import { PoweredBy } from './';
-import { PaidOrderFields, TradeInfo } from './PaidOrderFields';
-import { configuration } from './Configuration';
+
 import {
   CustomFieldsType,
   HtmlFormPostParams,
@@ -10,35 +7,23 @@ import {
   PaidOrder as IPaidOrder,
   PaidOrderParams,
 } from '../PaidOrder';
+import { CVSCOM_Types, PayMethods } from '../PayMethods';
 import { Locales } from '../Locales';
+import { PoweredBy } from './';
+import { PaidOrderFields, TradeInfo } from './PaidOrderFields';
+import { AcceptMethods, configuration } from './Configuration';
 
 interface CustomFields extends CustomFieldsType {
   installment: TradeInfo['InstFlag'];
   locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
 
-type AllAcceptMethods =
-  | PayMethods.Credit
-  | PayMethods.GooglePay
-  | PayMethods.SamsungPay
-  | PayMethods.LinePay
-  | PayMethods.CreditReward
-  | PayMethods.UnionPay
-  | PayMethods.WebATM
-  | PayMethods.VACC
-  | PayMethods.CVS
-  | PayMethods.CVSBarcode
-  | PayMethods.ezPay
-  | PayMethods.EsunWallet
-  | PayMethods.TaiwanPay
-  | PayMethods.CVSCOM;
-
 //===================================
 // End of Types
 //===================================
 
-export class PaidOrder<EnableMethods extends AllAcceptMethods> extends IPaidOrder<
-  AllAcceptMethods,
+export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
+  AcceptMethods,
   CustomFields
 > {
   private _tradeInfo: TradeInfo | undefined;
@@ -76,10 +61,10 @@ export class PaidOrder<EnableMethods extends AllAcceptMethods> extends IPaidOrde
       TradeLimit: params.timeLimit,
       LangType: langType,
       EmailModify: params.userEmailModify ? 1 : 0,
-      ReturnURL: '',
-      NotifyURL: '',
+      ReturnURL: params.returnUrl ?? env.returnUrl ?? undefined,
+      NotifyURL: params.notifyUrl ?? env.notifyUrl ?? undefined,
       CustomerURL: undefined,
-      ClientBackURL: undefined,
+      ClientBackURL: params.backUrl,
       RespondType: 'JSON',
       Version: '1.6',
 
@@ -136,19 +121,6 @@ export class PaidOrder<EnableMethods extends AllAcceptMethods> extends IPaidOrde
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
     }).toString(CryptoJS.format.Hex);
-  }
-
-  static decryptTradeInfo(tradeInfo: string) {
-    const env = configuration.getEnvParams();
-    const str = CryptoJS.enc.Hex.parse(tradeInfo);
-    const cipherParams = CryptoJS.lib.CipherParams.create({
-      ciphertext: str,
-      padding: CryptoJS.pad.Pkcs7,
-    });
-    return AES.decrypt(cipherParams, CryptoJS.enc.Utf8.parse(env.hashKey), {
-      iv: CryptoJS.enc.Utf8.parse(env.hashIV),
-      mode: CryptoJS.mode.CBC,
-    }).toString(CryptoJS.enc.Utf8);
   }
 
   static hashTradeInfo(tradeInfo: string) {

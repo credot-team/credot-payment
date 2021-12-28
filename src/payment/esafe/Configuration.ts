@@ -1,6 +1,8 @@
 import { Configuration } from '../Configuration';
 import { PayMethods } from '../PayMethods';
 
+export type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst;
+
 interface EsafeEnvironmentParameters {
   //付款API host
   paymentApiHost: string;
