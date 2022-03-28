@@ -14,6 +14,9 @@ import { PaidOrderFields, TradeInfo } from './PaidOrderFields';
 import { AcceptMethods, configuration } from './Configuration';
 
 interface CustomFields extends CustomFieldsType {
+  /**
+   * @see TradeInfo.InstFlag
+   */
   installment: TradeInfo['InstFlag'];
   locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
@@ -21,6 +24,8 @@ interface CustomFields extends CustomFieldsType {
 //===================================
 // End of Types
 //===================================
+
+const API_VERSION = '2.0';
 
 export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   AcceptMethods,
@@ -66,7 +71,7 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       CustomerURL: undefined,
       ClientBackURL: params.backUrl,
       RespondType: 'JSON',
-      Version: '1.6',
+      Version: API_VERSION,
 
       CREDIT: payMethods.includes(PayMethods.Credit) ? 1 : 0,
       ANDROIDPAY: payMethods.includes(PayMethods.GooglePay) ? 1 : 0,
@@ -78,7 +83,9 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       VACC: payMethods.includes(PayMethods.VACC) ? 1 : 0,
       CVS: payMethods.includes(PayMethods.CVS) ? 1 : 0,
       BARCODE: payMethods.includes(PayMethods.CVSBarcode) ? 1 : 0,
-      P2G: payMethods.includes(PayMethods.ezPay) ? 1 : 0,
+      EZPAY: payMethods.includes(PayMethods.ezPay) ? 1 : 0,
+      EZPWECHAT: payMethods.includes(PayMethods.ezPay_Wechat) ? 1 : 0,
+      EZPALIPAY: payMethods.includes(PayMethods.ezPay_Alipay) ? 1 : 0,
       ESUNWALLET: payMethods.includes(PayMethods.EsunWallet) ? 1 : 0,
       TAIWANPAY: payMethods.includes(PayMethods.TaiwanPay) ? 1 : 0,
       CVSCOM: payMethods.includes(PayMethods.CVSCOM) ? 1 : 0,
@@ -108,7 +115,7 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       TradeInfo: encryptedTradeInfo,
       TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo),
       MerchantID: env.merchantId,
-      Version: '1.6',
+      Version: API_VERSION,
     };
     this._tradeInfo = args;
   }

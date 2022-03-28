@@ -13,12 +13,12 @@ type InstFlag =
   | `${InstFlags},${InstFlags},${InstFlags},${InstFlags},${InstFlags},${InstFlags}`;
 
 /**
- * @version v1.1.1
+ * @version v1.1.3
  * 支付請求結構
  *
  * 參考技術文件版本號 Gateway_MPG_1.1.1
  *
- * 技術文件連結: {@link https://www.newebpay.com/website/Page/download_file?name=Newebpay_MPG_1.1.1.pdf}
+ * 技術文件連結: {@link https://www.newebpay.com/website/Page/download_file?name=NewebPay_MPG%20API%20Specification_MPG_1.1.3.pdf}
  */
 export interface PaidOrderFields {
   /**
@@ -45,9 +45,14 @@ export interface PaidOrderFields {
   /**
    * 串接程式版本
    *
-   * 請帶 1.6。
+   * 請帶 2.0。
    */
-  Version: '1.6';
+  Version: '2.0';
+
+  /**
+   *
+   */
+  EncryptType?: 1 | 0;
 }
 
 /**
@@ -72,15 +77,17 @@ export type TradeInfo = {
    * 時間戳記 (秒)
    *
    * 以 1970-01-01 00:00:00 為起點
+   *
+   * 須確實帶入自 Unix 紀元到當前時間的秒數以避免交易失敗。(容許誤差值 1200 秒)
    */
   TimeStamp: string;
 
   /**
    * 串接程式版本
    *
-   * 請帶 1.6
+   * 請帶 2.0
    */
-  Version: '1.6';
+  Version: '2.0';
 
   /**
    * MPG 頁面顯示的文字語系
@@ -321,6 +328,8 @@ export type TradeInfo = {
    * - 0 = 不啟用
    *
    * 當未提供此參數時表示不啟用。
+   *
+   * 當該筆訂單金額超過 5 萬元時，即使此參數設定為啟用，MPG 付款頁面仍不會顯示此支付方式選項。
    */
   WEBATM?: 0 | 1;
 
@@ -332,6 +341,8 @@ export type TradeInfo = {
    * - 0 = 不啟用
    *
    * 當未提供此參數時表示不啟用。
+   *
+   * 當該筆訂單金額超過 5 萬元時，即使此參數設定為啟用，MPG 付款頁面仍不會顯示此支付方式選項。
    */
   VACC?: 0 | 1;
 
@@ -360,28 +371,6 @@ export type TradeInfo = {
    * 當未提供此參數時表示不啟用。
    */
   BARCODE?: 0 | 1;
-
-  /**
-   * 支付寶啟用
-   *
-   * 設定是否啟用支付寶支付方式。
-   * - 1 = 啟用
-   * - 0 = 不啟用
-   *
-   * 當未提供此參數時表示不啟用。
-   */
-  ALIPAY?: 0 | 1;
-
-  /**
-   * ezPay 電子錢包啟用
-   *
-   * 設定是否啟用 ezPay 電子錢包支付方式。
-   * - 1 = 啟用
-   * - 0 = 不啟用
-   *
-   * 當未提供此參數時表示不啟用。
-   */
-  P2G?: 0 | 1;
 
   /**
    * 玉山 Wallet 啟用
@@ -419,92 +408,55 @@ export type TradeInfo = {
    * 當未提供此參數時表示不啟用。
    */
   CVSCOM?: 0 | 1 | 2 | 3;
-} & Partial<AliPayFields> &
-  NTCBFields &
+
+  /**
+   * 簡單付電子錢包啟用
+   *
+   * 設定是否啟用簡單付電子錢包支付方式。
+   * - 1 = 啟用
+   * - 0 = 不啟用
+   *
+   * 當未提供此參數時表示不啟用。
+   */
+  EZPAY?: 0 | 1;
+
+  /**
+   * 簡單付微信支付啟用
+   *
+   * 設定是否啟用簡單付微信支付支付方式。
+   * - 1 = 啟用
+   * - 0 = 不啟用
+   *
+   * 當未提供此參數時表示不啟用。
+   */
+  EZPWECHAT?: 0 | 1;
+
+  /**
+   * 簡單付支付寶啟用
+   *
+   * 設定是否啟用簡單付支付寶支付方式。
+   * - 1 = 啟用
+   * - 0 = 不啟用
+   *
+   * 當未提供此參數時表示不啟用。
+   */
+  EZPALIPAY?: 0 | 1;
+
+  /**
+   * 物流型態
+   *
+   * 1.帶入參數值說明：
+   *  - B2C＝超商大宗寄倉(目前僅支援統一超商)
+   *  - C2C＝超商店到店(目前僅支援全家)
+   *
+   * 2.若商店未帶入此參數，則系統預設值說明如下：
+   *  - 系統優先啟用［B2C 大宗寄倉］。
+   *  - 若商店設定中未啟用［B2C 大宗寄倉］，則系統將會啟用［C2C 店到店］。
+   *  - 若商店設定中，［B2C 大宗寄倉］與［C2C 店到店］皆未啟用，則支付頁面中將不會出現物流選項。
+   */
+  LgsType?: 'B2C' | 'C2C';
+} & NTCBFields &
   Partial<CreditToken>;
-
-type AliPaySerialField<F extends string, T> = {
-  [k in `${F}${number}`]: T;
-};
-
-/**
- * 適用跨境支付參數說明
- *
- * 當有啟用支付寶支付方式時，提供下列參數。
- */
-type AliPayFields = {
-  /**
-   * 收貨人姓名
-   */
-  Receiver: string;
-
-  /**
-   * 收貨人主要聯絡電話
-   */
-  Tel1: string;
-
-  /**
-   * 收貨人次要聯絡電話
-   */
-  Tel2: string;
-
-  /**
-   * 商品項次
-   *
-   * 此次交易的商品項次。例：此訂單包含商品 A、商品 B 兩種商品品項時，此參數為 2。
-   */
-  Count: number;
-
-  /**
-   * 商品編號
-   *
-   * 長度限制為 12 字元
-   *
-   * Pid 參數數量需與 Count 參數中的數值相同。
-   * - 例：當 Count=2 時，則需有 2 個 Pid 參數「Pid1」、「Pid2」。「Pid1」為商品 A 的商品編號，「Pid2」為商品 B 的商品編號。
-   */
-  Pid1: number;
-
-  /**
-   * 商品名稱
-   *
-   * 長度限制為 60 字元。
-   *
-   * Title 參數數量需與 Count 參數中的數值相同。
-   * - 例：當 Count=2 時，則需有 2 個 Title 參數「Title1」、「Title2」。「Title1」為商品 A的商品名稱，「Title2」為商品 B 的商品名稱。
-   */
-  Title1: string;
-
-  /**
-   * 商品說明
-   *
-   * 長度限制為 100 字元。
-   *
-   * Desc 參數數量需與 Count 參數中的數值相同。
-   * - 例：當 Count=2 時，則需有 2 個 Desc 參數「Desc1」、「Desc2」。「Desc1」為商品 A的商品說明，「Desc2」為商品 B 的商品說明。
-   */
-  Desc1: string;
-
-  /**
-   * 商品單價(台幣)
-   *
-   * Price 參數數量需與 Count 參數中的數值相同。
-   * - 例：當 Count=2 時，則需有 2 個 Price 參數「Price 1」、「Price 2」。「Price 1」為商品A 的商品單價，「Price 2」為商品 B 的商品單價。
-   */
-  Price1: number;
-
-  /**
-   * 商品數量
-   *
-   * Qty 參數數量需與 Count 參數中的數值相同。
-   * - 例：當 Count=2 時，則需有 2 個 Qty 參數「Qty 1」、「Qty 2」。「Qty 1」為商品 A的商品數量，「Qty 2」為商品 B 的商品數量。
-   */
-  Qty1: number;
-} & AliPaySerialField<'Pid', number> &
-  AliPaySerialField<'Title', string> &
-  AliPaySerialField<'Desc', string> &
-  AliPaySerialField<'Price', number> &
-  AliPaySerialField<'Qty', number>;
 
 /**
  * 用國民旅遊卡交易參數

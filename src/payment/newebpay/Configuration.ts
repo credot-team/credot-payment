@@ -13,10 +13,12 @@ export type AcceptMethods =
   | PayMethods.VACC
   | PayMethods.CVS
   | PayMethods.CVSBarcode
-  | PayMethods.ezPay
   | PayMethods.EsunWallet
   | PayMethods.TaiwanPay
-  | PayMethods.CVSCOM;
+  | PayMethods.CVSCOM
+  | PayMethods.ezPay
+  | PayMethods.ezPay_Wechat
+  | PayMethods.ezPay_Alipay;
 
 interface NewebpayEnvironmentParameters {
   // 付款API host

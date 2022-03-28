@@ -102,7 +102,7 @@ export abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends
 
   abstract poweredBy(): string;
 
-  payMethod(): PayMethods[] {
+  payMethod(): AcceptMethods[] {
     return [...this._payMethods];
   }
 

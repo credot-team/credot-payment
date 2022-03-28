@@ -32,14 +32,19 @@ export const PaymentTypes = {
   CVSCOM: PayMethods.CVSCOM,
 
   /**
-   * 支付寶
+   * 微信支付-簡單付
    */
-  ALIPAY: PayMethods.Alipay,
+  EZPWECHAT: PayMethods.ezPay_Wechat,
+
+  /**
+   * 支付寶-簡單付
+   */
+  EZPALIPAY: PayMethods.ezPay_Alipay,
 
   /**
    * ezPay 電子錢包
    */
-  P2GEACC: PayMethods.ezPay,
+  EZPAY: PayMethods.ezPay,
 
   /**
    * LINE Pay

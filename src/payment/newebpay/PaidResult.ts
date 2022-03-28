@@ -109,11 +109,13 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true
         };
         break;
       case PayMethods.ezPay:
+      case PayMethods.ezPay_Wechat:
+      case PayMethods.ezPay_Alipay:
         result = unknownResult as TradeResult<PayMethods.ezPay>;
         payInfo.thirdParty = {
-          tradeNo: result.P2GTradeNo,
-          amount: result.P2GAmt,
-          paymentType: result.P2GPaymentType,
+          paymentType: result.ChannelID,
+          tradeNo: result.ChannelNo,
+          amount: result.Amt,
         };
         break;
       case PayMethods.CVSCOM:
