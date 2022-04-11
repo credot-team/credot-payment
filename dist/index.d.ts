@@ -1,7 +1,4 @@
-import esafe from './esafe';
-import newebpay from './newebpay';
-declare const _default: {
-    esafe: typeof esafe;
-    newebpay: typeof newebpay;
-};
-export = _default;
+export { PayMethods, StoreTypes, CVSCOM_Types, Locales, OrderStatus } from './src/payment';
+import * as esafe from './src/payment/esafe';
+import * as newebpay from './src/payment/newebpay';
+export { esafe, newebpay };

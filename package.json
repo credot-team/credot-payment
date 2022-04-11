@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
-  "exports": {
-    ".": "./dist/index.js",
-    "./esafe": "./dist/esafe.js",
-    "./newebpay": "./dist/newebpay.js"
-  },
   "scripts": {
     "build": "tsc --build --clean & tsc"
   },
