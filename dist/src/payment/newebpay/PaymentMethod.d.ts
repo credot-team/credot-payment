@@ -25,13 +25,17 @@ export declare const PaymentTypes: {
      */
     CVSCOM: PayMethods;
     /**
-     * 支付寶
+     * 微信支付-簡單付
      */
-    ALIPAY: PayMethods;
+    EZPWECHAT: PayMethods;
+    /**
+     * 支付寶-簡單付
+     */
+    EZPALIPAY: PayMethods;
     /**
      * ezPay 電子錢包
      */
-    P2GEACC: PayMethods;
+    EZPAY: PayMethods;
     /**
      * LINE Pay
      */

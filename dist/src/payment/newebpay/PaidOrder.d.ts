@@ -3,6 +3,9 @@ import { Locales } from '../Locales';
 import { TradeInfo } from './PaidOrderFields';
 import { AcceptMethods } from './Configuration';
 interface CustomFields extends CustomFieldsType {
+    /**
+     * @see TradeInfo.InstFlag
+     */
     installment: TradeInfo['InstFlag'];
     locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }

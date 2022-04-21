@@ -40,10 +40,6 @@ export declare enum PayMethods {
      */
     TaiwanPay = "taiwan-pay",
     /**
-     * ezPay 電子錢包
-     */
-    ezPay = "ez-pay",
-    /**
      * 超商代碼繳費
      */
     CVS = "cvs",
@@ -60,9 +56,17 @@ export declare enum PayMethods {
      */
     CVSCOM = "cvscom",
     /**
-     * 支付寶
+     * ezPay 電子錢包
      */
-    Alipay = "alipay"
+    ezPay = "ezpay",
+    /**
+     * ezPay-微信支付
+     */
+    ezPay_Wechat = "ezpay-wechat",
+    /**
+     * ezPay-支付寶
+     */
+    ezPay_Alipay = "ezpay-alipay"
 }
 export declare enum CVSCOM_Types {
     /**

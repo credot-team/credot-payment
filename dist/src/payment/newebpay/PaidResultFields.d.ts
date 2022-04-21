@@ -6,9 +6,9 @@ declare type KeyofPaymentTypes = keyof typeof PaymentTypes;
  * @version v1.1.1
  * 支付請求結構
  *
- * 參考技術文件版本號 Gateway_MPG_1.1.1
+ * 參考技術文件版本號 Gateway_MPG_1.1.3
  *
- * 技術文件連結: {@link https://www.newebpay.com/website/Page/download_file?name=Newebpay_MPG_1.1.1.pdf}
+ * 技術文件連結: {@link https://www.newebpay.com/website/Page/download_file?name=NewebPay_MPG%20API%20Specification_MPG_1.1.3.pdf}
  */
 export interface PaidResultFields<Decoded extends boolean, PayMethod extends PayMethods | unknown> {
     /**
@@ -44,6 +44,13 @@ export interface PaidResultFields<Decoded extends boolean, PayMethod extends Pay
      * 串接程式版本
      */
     Version: string;
+    /**
+     * 加密模式
+     *
+     * - 若商店設定 EncryptType 為 1，則會回傳此參數
+     * - 若商店設定 EncryptType 為 0 或未有此參數，則不會回傳此參數
+     */
+    EncryptType?: 1;
 }
 declare type TradeInfo<PayMethod extends PayMethods | unknown> = {
     /**
@@ -71,7 +78,7 @@ declare type TradeInfo<PayMethod extends PayMethods | unknown> = {
 /**
  * 回傳參數，根據提供的泛型型別決定不同付款方式的資料欄位
  */
-declare type Result<PayMethod extends PayMethods | unknown> = GeneralFields & (PayMethod extends PayMethods.Credit | PayMethods.CreditInst | PayMethods.CreditReward | PayMethods.SamsungPay | PayMethods.GooglePay | PayMethods.UnionPay ? CreditCardFields : PayMethod extends PayMethods.WebATM | PayMethods.VACC ? ATMFields : PayMethod extends PayMethods.CVS ? CVSCodeFields : PayMethod extends PayMethods.CVSBarcode ? CVSBarcodeFields : PayMethod extends PayMethods.ezPay ? ezPayFields : PayMethod extends PayMethods.CVSCOM ? CVSCOMFields : PayMethod extends PayMethods.Alipay ? AlipayFields : PayMethod extends PayMethods.EsunWallet ? EsunWalletFields : PayMethod extends PayMethods.TaiwanPay ? TaiwanPayFields : Partial<CreditCardFields> & Partial<CVSCodeFields> & Partial<CVSBarcodeFields> & Partial<ezPayFields> & Partial<CVSCOMFields> & Partial<AlipayFields> & Partial<EsunWalletFields> & Partial<TaiwanPayFields>);
+declare type Result<PayMethod extends PayMethods | unknown> = GeneralFields & (PayMethod extends PayMethods.Credit | PayMethods.CreditInst | PayMethods.CreditReward | PayMethods.SamsungPay | PayMethods.GooglePay | PayMethods.UnionPay ? CreditCardFields : PayMethod extends PayMethods.WebATM | PayMethods.VACC ? ATMFields : PayMethod extends PayMethods.CVS ? CVSCodeFields : PayMethod extends PayMethods.CVSBarcode ? CVSBarcodeFields : PayMethod extends PayMethods.CVSCOM ? CVSCOMFields : PayMethod extends PayMethods.ezPay | PayMethods.ezPay_Wechat | PayMethods.ezPay_Alipay ? CrossBorderFields : PayMethod extends PayMethods.EsunWallet ? EsunWalletFields : PayMethod extends PayMethods.TaiwanPay ? TaiwanPayFields : Partial<CreditCardFields> & Partial<CVSCodeFields> & Partial<CVSBarcodeFields> & Partial<CVSCOMFields> & Partial<CrossBorderFields> & Partial<EsunWalletFields> & Partial<TaiwanPayFields>);
 /**
  * 所有支付方式共同回傳參數
  */
@@ -325,29 +332,6 @@ declare type CVSBarcodeFields = {
     PayStore: 'SEVEN' | 'FAMILY' | 'OK' | 'HILIFE';
 };
 /**
- * ezPay 電子錢包回傳參數
- */
-declare type ezPayFields = {
-    /**
-     * ezPay 交易序號
-     *
-     * P2G 在此筆交易所產生的序號
-     */
-    P2GTradeNo: string;
-    /**
-     * ezPay 支付方式
-     *
-     * 可參考 附件一。但前面會為 P2G_ 開頭
-     */
-    P2GPaymentType: 'P2GEACC' | `P2G_${keyof Omit<typeof PaymentTypes, 'P2GEACC'>}`;
-    /**
-     * ezPay 交易金額 (新台幣)
-     *
-     * 純數字不含符號
-     */
-    P2GAmt: number;
-};
-/**
  * 超商物流回傳參數
  */
 declare type CVSCOMFields = {
@@ -362,7 +346,7 @@ declare type CVSCOMFields = {
     /**
      * 超商類別名稱
      *
-     * 回傳[全家]
+     * 回傳[全家]、[7-ELEVEN]
      */
     StoreType: string;
     /**
@@ -384,19 +368,32 @@ declare type CVSCOMFields = {
      */
     CVSCOMPhone: string;
     /**
-     * 物流訂單序號 (即 C2C 寄件代碼)
+     * 物流訂單序號 (即寄件代碼)
      */
     LgsNo: string;
+    /**
+     * 物流型態
+     *
+     * 回傳 B2C、C2C
+     */
+    LgsType: 'B2C' | 'C2C';
 };
 /**
- * 跨境支付回傳參數
+ * 跨境支付回傳參數(包含簡單付電子錢包、簡單付微信支付、簡單付支付寶)
  */
-declare type AlipayFields = {
+declare type CrossBorderFields = {
     /**
      * 跨境通路類型
      *
      * 該筆交易之跨境收款通路。
      * - ALIPAY = 支付寶
+     * - WECHATPAY = 微信支付
+     * - ACCLINK = 約定連結帳戶
+     * - CREDIT = 信用卡
+     * - CVS = 超商代碼
+     * - P2GEACC = 簡單付電子帳戶轉帳
+     * - VACC = ATM 轉帳
+     * - WEBATM = WebATM 轉帳
      */
     ChannelID: 'ALIPAY';
     /**

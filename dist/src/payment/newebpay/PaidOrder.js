@@ -29,6 +29,7 @@ const Configuration_1 = require("./Configuration");
 //===================================
 // End of Types
 //===================================
+const API_VERSION = '2.0';
 class PaidOrder extends PaidOrder_1.PaidOrder {
     /**
      *
@@ -61,7 +62,7 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
             CustomerURL: undefined,
             ClientBackURL: params.backUrl,
             RespondType: 'JSON',
-            Version: '1.6',
+            Version: API_VERSION,
             CREDIT: payMethods.includes(PayMethods_1.PayMethods.Credit) ? 1 : 0,
             ANDROIDPAY: payMethods.includes(PayMethods_1.PayMethods.GooglePay) ? 1 : 0,
             SAMSUNGPAY: payMethods.includes(PayMethods_1.PayMethods.SamsungPay) ? 1 : 0,
@@ -72,7 +73,9 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
             VACC: payMethods.includes(PayMethods_1.PayMethods.VACC) ? 1 : 0,
             CVS: payMethods.includes(PayMethods_1.PayMethods.CVS) ? 1 : 0,
             BARCODE: payMethods.includes(PayMethods_1.PayMethods.CVSBarcode) ? 1 : 0,
-            P2G: payMethods.includes(PayMethods_1.PayMethods.ezPay) ? 1 : 0,
+            EZPAY: payMethods.includes(PayMethods_1.PayMethods.ezPay) ? 1 : 0,
+            EZPWECHAT: payMethods.includes(PayMethods_1.PayMethods.ezPay_Wechat) ? 1 : 0,
+            EZPALIPAY: payMethods.includes(PayMethods_1.PayMethods.ezPay_Alipay) ? 1 : 0,
             ESUNWALLET: payMethods.includes(PayMethods_1.PayMethods.EsunWallet) ? 1 : 0,
             TAIWANPAY: payMethods.includes(PayMethods_1.PayMethods.TaiwanPay) ? 1 : 0,
             CVSCOM: payMethods.includes(PayMethods_1.PayMethods.CVSCOM) ? 1 : 0,
@@ -101,7 +104,7 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
             TradeInfo: encryptedTradeInfo,
             TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo),
             MerchantID: env.merchantId,
-            Version: '1.6',
+            Version: API_VERSION,
         };
         this._tradeInfo = args;
     }

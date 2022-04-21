@@ -28,13 +28,17 @@ exports.PaymentTypes = {
      */
     CVSCOM: PayMethods_1.PayMethods.CVSCOM,
     /**
-     * 支付寶
+     * 微信支付-簡單付
      */
-    ALIPAY: PayMethods_1.PayMethods.Alipay,
+    EZPWECHAT: PayMethods_1.PayMethods.ezPay_Wechat,
+    /**
+     * 支付寶-簡單付
+     */
+    EZPALIPAY: PayMethods_1.PayMethods.ezPay_Alipay,
     /**
      * ezPay 電子錢包
      */
-    P2GEACC: PayMethods_1.PayMethods.ezPay,
+    EZPAY: PayMethods_1.PayMethods.ezPay,
     /**
      * LINE Pay
      */

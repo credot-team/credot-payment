@@ -51,6 +51,7 @@ TradeInfo 裡的 MerchantID 參數與回傳 MerchantID
     MPG03009: `交易失敗
 (交易資料 SHA 256 檢查不符合
 交易資料 TradeInfo 解密失敗
+EncryptType 參數值錯誤
 銀行回覆此筆交易授權失敗原因)`,
     MPG03010: `驗證資料不存在或錯誤 (玉山 Wallet 及 台灣 Pay 的錯誤代碼)`,
     MPG03011: `訂單資料已不存在，請重新交易 (玉山 Wallet 及 台灣 Pay 的錯誤代碼)`,

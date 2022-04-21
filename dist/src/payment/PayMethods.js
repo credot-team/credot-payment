@@ -44,10 +44,6 @@ var PayMethods;
      */
     PayMethods["TaiwanPay"] = "taiwan-pay";
     /**
-     * ezPay 電子錢包
-     */
-    PayMethods["ezPay"] = "ez-pay";
-    /**
      * 超商代碼繳費
      */
     PayMethods["CVS"] = "cvs";
@@ -64,9 +60,17 @@ var PayMethods;
      */
     PayMethods["CVSCOM"] = "cvscom";
     /**
-     * 支付寶
+     * ezPay 電子錢包
      */
-    PayMethods["Alipay"] = "alipay";
+    PayMethods["ezPay"] = "ezpay";
+    /**
+     * ezPay-微信支付
+     */
+    PayMethods["ezPay_Wechat"] = "ezpay-wechat";
+    /**
+     * ezPay-支付寶
+     */
+    PayMethods["ezPay_Alipay"] = "ezpay-alipay";
 })(PayMethods = exports.PayMethods || (exports.PayMethods = {}));
 var CVSCOM_Types;
 (function (CVSCOM_Types) {

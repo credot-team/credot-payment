@@ -108,11 +108,13 @@ class PaidResult extends PaidResult_1.PaidResult {
                 };
                 break;
             case PayMethods_1.PayMethods.ezPay:
+            case PayMethods_1.PayMethods.ezPay_Wechat:
+            case PayMethods_1.PayMethods.ezPay_Alipay:
                 result = unknownResult;
                 payInfo.thirdParty = {
-                    tradeNo: result.P2GTradeNo,
-                    amount: result.P2GAmt,
-                    paymentType: result.P2GPaymentType,
+                    paymentType: result.ChannelID,
+                    tradeNo: result.ChannelNo,
+                    amount: result.Amt,
                 };
                 break;
             case PayMethods_1.PayMethods.CVSCOM:

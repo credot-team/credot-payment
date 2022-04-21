@@ -64,7 +64,7 @@ export declare abstract class PaidOrder<AcceptMethods extends PayMethods, Custom
      */
     protected constructor(payMethod: AcceptMethods | AcceptMethods[], params: PaidOrderParams<AcceptMethods, Custom>);
     abstract poweredBy(): string;
-    payMethod(): PayMethods[];
+    payMethod(): AcceptMethods[];
     orderNo(): string;
     amount(): number;
     abstract checksum(): string;
