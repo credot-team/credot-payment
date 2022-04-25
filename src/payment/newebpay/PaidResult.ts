@@ -30,20 +30,20 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true
 
   constructor(
     result: PaidResultFields<false, AcceptMethods>,
-    options: PaidResultOptions<AcceptMethods>,
+    options?: PaidResultOptions<AcceptMethods>,
   ) {
     const tradeInfo: PaidResultFields<true, unknown>['TradeInfo'] = JSON.parse(
       PaidResult.decryptTradeInfo(result.TradeInfo),
     );
     super(
       { ...result, TradeInfo: tradeInfo },
-      { payMethod: options.payMethod ?? PaymentTypes[tradeInfo.Result.PaymentType] },
+      { payMethod: options?.payMethod ?? (PaymentTypes[tradeInfo.Result.PaymentType] as any) },
     );
 
     this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo);
     this._result = tradeInfo.Result;
     this._finishedAt =
-      options.finishedAt ??
+      options?.finishedAt ??
       (this._result.PayTime ? dayjs(this._result.PayTime + '+08:00').toDate() : new Date());
     this._status = parseErrorCode(this._rawData.TradeInfo.Status ?? '');
     this._isSucceed = this._status === OrderStatus.success;
