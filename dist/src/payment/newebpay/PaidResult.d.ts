@@ -10,7 +10,7 @@ export declare class PaidResult extends IPaidResult<AcceptMethods, PaidResultFie
     private readonly _finishedAt;
     private readonly _isSucceed;
     private readonly _status;
-    constructor(result: PaidResultFields<false, AcceptMethods>, options: PaidResultOptions<AcceptMethods>);
+    constructor(result: PaidResultFields<false, AcceptMethods>, options?: PaidResultOptions<AcceptMethods>);
     parse(): void;
     static decryptTradeInfo(tradeInfo: string): string;
     static hashTradeInfo(tradeInfo: string): string;
