@@ -37,11 +37,11 @@ class PaidResult extends PaidResult_1.PaidResult {
     constructor(result, options) {
         var _a, _b, _c;
         const tradeInfo = JSON.parse(PaidResult.decryptTradeInfo(result.TradeInfo));
-        super(Object.assign(Object.assign({}, result), { TradeInfo: tradeInfo }), { payMethod: (_a = options.payMethod) !== null && _a !== void 0 ? _a : PaymentMethod_1.PaymentTypes[tradeInfo.Result.PaymentType] });
+        super(Object.assign(Object.assign({}, result), { TradeInfo: tradeInfo }), { payMethod: (_a = options === null || options === void 0 ? void 0 : options.payMethod) !== null && _a !== void 0 ? _a : PaymentMethod_1.PaymentTypes[tradeInfo.Result.PaymentType] });
         this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo);
         this._result = tradeInfo.Result;
         this._finishedAt =
-            (_b = options.finishedAt) !== null && _b !== void 0 ? _b : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
+            (_b = options === null || options === void 0 ? void 0 : options.finishedAt) !== null && _b !== void 0 ? _b : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
         this._status = (0, ErrorCode_1.parseErrorCode)((_c = this._rawData.TradeInfo.Status) !== null && _c !== void 0 ? _c : '');
         this._isSucceed = this._status === OrderStatus_1.OrderStatus.success;
         this.parse();

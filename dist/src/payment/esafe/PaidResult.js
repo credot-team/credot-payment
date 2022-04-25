@@ -17,6 +17,8 @@ dayjs_1.default.extend(customParseFormat_1.default);
 class PaidResult extends PaidResult_1.PaidResult {
     constructor(result, options) {
         var _a, _b;
+        if (!(options === null || options === void 0 ? void 0 : options.payMethod))
+            throw new Error(`options.payMethod should be provided for ${_1.PoweredBy} result`);
         super(result, { payMethod: options.payMethod });
         if (this.isFromBrowser()) {
             const data = this._rawData;
