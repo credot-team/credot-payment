@@ -22,6 +22,9 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields> {
   private readonly _status: OrderStatus;
 
   constructor(result: PaidResultFields, options: PaidResultOptions<AcceptMethods>) {
+    if (!options?.payMethod)
+      throw new Error(`options.payMethod should be provided for ${PoweredBy} result`);
+
     super(result, { payMethod: options.payMethod });
     if (this.isFromBrowser()) {
       const data = this._rawData as any;
