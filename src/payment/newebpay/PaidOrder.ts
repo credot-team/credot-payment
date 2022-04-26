@@ -122,7 +122,11 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
 
   static encryptTradeInfo(tradeInfo: TradeInfo) {
     const env = configuration.getEnvParams();
-    const qs = new URLSearchParams(tradeInfo as any).toString();
+    const params = new URLSearchParams();
+    Object.entries(tradeInfo).forEach(
+      ([k, v]) => v !== undefined && v !== null && params.set(k, v as any),
+    );
+    const qs = params.toString();
     return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(env.hashKey), {
       iv: CryptoJS.enc.Utf8.parse(env.hashIV),
       mode: CryptoJS.mode.CBC,
