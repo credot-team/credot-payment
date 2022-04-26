@@ -107,7 +107,9 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
     }
     static encryptTradeInfo(tradeInfo) {
         const env = Configuration_1.configuration.getEnvParams();
-        const qs = new URLSearchParams(tradeInfo).toString();
+        const params = new URLSearchParams();
+        Object.entries(tradeInfo).forEach(([k, v]) => v !== undefined && v !== null && params.set(k, v));
+        const qs = params.toString();
         return crypto_js_1.AES.encrypt(qs, crypto_js_1.default.enc.Utf8.parse(env.hashKey), {
             iv: crypto_js_1.default.enc.Utf8.parse(env.hashIV),
             mode: crypto_js_1.default.mode.CBC,
