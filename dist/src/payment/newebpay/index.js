@@ -16,4 +16,5 @@ __exportStar(require("./PaidOrderFields"), exports);
 __exportStar(require("./PaidOrder"), exports);
 __exportStar(require("./PaidResultFields"), exports);
 __exportStar(require("./PaidResult"), exports);
+__exportStar(require("./api"), exports);
 exports.PoweredBy = 'newebpay';

@@ -9,7 +9,7 @@ export interface HtmlFormPostParams {
 }
 export interface OrderApplyResult {
     method: 'redirect' | 'page' | 'json';
-    payload: any;
+    payload: HtmlFormPostParams;
 }
 export interface CustomFieldsType {
     installment?: any;
