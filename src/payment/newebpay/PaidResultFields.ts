@@ -99,26 +99,26 @@ type Result<PayMethod extends PayMethods | unknown> = GeneralFields &
     | PayMethods.UnionPay
     ? CreditCardFields
     : PayMethod extends PayMethods.WebATM | PayMethods.VACC
-    ? ATMFields
-    : PayMethod extends PayMethods.CVS
-    ? CVSCodeFields
-    : PayMethod extends PayMethods.CVSBarcode
-    ? CVSBarcodeFields
-    : PayMethod extends PayMethods.CVSCOM
-    ? CVSCOMFields
-    : PayMethod extends PayMethods.ezPay | PayMethods.ezPay_Wechat | PayMethods.ezPay_Alipay
-    ? CrossBorderFields
-    : PayMethod extends PayMethods.EsunWallet
-    ? EsunWalletFields
-    : PayMethod extends PayMethods.TaiwanPay
-    ? TaiwanPayFields
-    : Partial<CreditCardFields> &
-        Partial<CVSCodeFields> &
-        Partial<CVSBarcodeFields> &
-        Partial<CVSCOMFields> &
-        Partial<CrossBorderFields> &
-        Partial<EsunWalletFields> &
-        Partial<TaiwanPayFields>);
+      ? ATMFields
+      : PayMethod extends PayMethods.CVS
+        ? CVSCodeFields
+        : PayMethod extends PayMethods.CVSBarcode
+          ? CVSBarcodeFields
+          : PayMethod extends PayMethods.CVSCOM
+            ? CVSCOMFields
+            : PayMethod extends PayMethods.ezPay | PayMethods.ezPay_Wechat | PayMethods.ezPay_Alipay
+              ? CrossBorderFields
+              : PayMethod extends PayMethods.EsunWallet
+                ? EsunWalletFields
+                : PayMethod extends PayMethods.TaiwanPay
+                  ? TaiwanPayFields
+                  : Partial<CreditCardFields> &
+                      Partial<CVSCodeFields> &
+                      Partial<CVSBarcodeFields> &
+                      Partial<CVSCOMFields> &
+                      Partial<CrossBorderFields> &
+                      Partial<EsunWalletFields> &
+                      Partial<TaiwanPayFields>);
 
 /**
  * 所有支付方式共同回傳參數
