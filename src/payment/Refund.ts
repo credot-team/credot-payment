@@ -1,11 +1,22 @@
 export interface RefundParams {
-  // 原訂單編號
+  /**
+   * 原訂單編號
+   */
   orderNo?: string;
-  // 原第三方訂單號
+
+  /**
+   * 原第三方訂單號
+   */
   applyNo?: string;
-  // 金額
+
+  /**
+   * 金額
+   */
   amount: number;
-  // 退款原因
+
+  /**
+   * 退款原因
+   */
   reason: string;
 }
 

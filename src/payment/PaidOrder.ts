@@ -15,13 +15,24 @@ export interface OrderApplyResult {
 }
 
 export interface CustomFieldsType {
-  // 信用卡分期
+  /**
+   * 信用卡分期
+   */
   installment?: any;
-  // 語言
+
+  /**
+   * 語言
+   */
   locale?: Locales;
-  // 限制交易時長(秒)
+
+  /**
+   * 限制交易時長(秒)
+   */
   timeLimit?: number;
-  // 開放修改信箱地址
+
+  /**
+   * 開放修改信箱地址
+   */
   userEmailModify?: boolean;
 }
 
@@ -43,37 +54,84 @@ type CVSCOMParameters = {
  * 訂單資訊
  */
 export type PaidOrderParams<AcceptMethods extends PayMethods, Custom extends CustomFieldsType> = {
-  // 訂單號
+  /**
+   * 訂單號
+   */
   orderNo: string;
-  // 訂單內容
+
+  /**
+   * 訂單內容
+   */
   orderInfo: string;
-  // 金額
+
+  /**
+   * 金額
+   */
   amount: number;
-  // 消費者姓名
+
+  /**
+   * 消費者姓名
+   */
   userName: string;
-  // 消費者電話
+
+  /**
+   * 消費者電話
+   */
   userPhone: string;
-  // 消費者電子信箱
+
+  /**
+   * 消費者電子信箱
+   */
   userEmail: string;
-  // 備註
+
+  /**
+   * 備註
+   */
   memo?: string;
-  // 交易完成後通知地址
+
+  /**
+   * 交易完成後通知地址
+   */
   notifyUrl?: string;
-  // 交易完成後前端導向地址
+
+  /**
+   * 交易完成後前端導向地址
+   */
   returnUrl?: string;
-  // 返回上一頁地址
+
+  /**
+   * 返回上一頁地址
+   */
   backUrl?: string;
-  // 語言
+
+  /**
+   * 語言
+   */
   locale?: Custom['locale'];
-  // 限制交易時長(秒)
+
+  /**
+   * 限制交易時長(秒)
+   */
   timeLimit?: Custom['timeLimit'];
-  // 開放修改信箱地址
+
+  /**
+   * 開放修改信箱地址
+   */
   userEmailModify?: Custom['userEmailModify'];
-  // 信用卡分期
+
+  /**
+   * 信用卡分期
+   */
   installment?: AcceptMethods extends PayMethods.CreditInst ? Custom['installment'] : undefined;
-  // linePay
+
+  /**
+   * linePay
+   */
   linePay?: AcceptMethods extends PayMethods.LinePay ? LinePayParameters : undefined;
-  // 超商物流
+
+  /**
+   * 超商物流
+   */
   cvscom?: AcceptMethods extends PayMethods.CVSCOM ? CVSCOMParameters : undefined;
 };
 

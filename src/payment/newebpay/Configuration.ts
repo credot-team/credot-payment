@@ -21,22 +21,34 @@ export type AcceptMethods =
   | PayMethods.ezPay_Alipay;
 
 interface NewebpayEnvironmentParameters {
-  // 付款API host
+  /**
+   * 付款API host
+   */
   paymentApiUrl: string;
 
-  // 商家代號
+  /**
+   * 商家代號
+   */
   merchantId: string;
 
-  // 交易完成後通知地址
+  /**
+   * 交易完成後通知地址
+   */
   notifyUrl?: string;
 
-  // 交易完成後前端導向地址
+  /**
+   * 交易完成後前端導向地址
+   */
   returnUrl?: string;
 
-  // HashKey
+  /**
+   * HashKey
+   */
   hashKey: string;
 
-  // HashIV
+  /**
+   * HashIV
+   */
   hashIV: string;
 }
 
