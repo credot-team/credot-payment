@@ -11,10 +11,25 @@ export interface PaidResultOptions<AcceptMethods extends PayMethods> {
     payerEmail?: string;
 }
 export interface PayInfo {
+    /**
+     * 付款人姓名
+     */
     payerName: string;
+    /**
+     * 付款人電話
+     */
     phone?: string;
+    /**
+     * 付款人 E-mail 地址
+     */
     email?: string;
+    /**
+     * 信用卡資訊
+     */
     credit?: {
+        /**
+         * 卡號
+         */
         creditNo: string;
         /**
          * 交易類型
@@ -26,34 +41,103 @@ export interface PayInfo {
          */
         method: string;
     };
+    /**
+     * atm 轉帳資訊
+     */
     atm?: {
+        /**
+         * 金融機構代碼
+         */
         bankCode: string;
+        /**
+         * 金融機構帳號
+         */
         account: string;
     };
+    /**
+     * 超商繳費資訊
+     */
     cvs?: {
+        /**
+         * 繳費類型: code/barcode (代碼/條碼繳費)
+         */
         type: 'code' | 'barcode';
+        /**
+         * 超商類型
+         */
         storeType: StoreTypes;
+        /**
+         * 門市代號
+         */
         storeID?: string;
+        /**
+         * 繳費代碼 (type = 'code')
+         */
         codeNo?: string;
+        /**
+         * 第一段條碼 (type = 'barcode')
+         */
         barcode_1?: string;
+        /**
+         * 第二段條碼 (type = 'barcode')
+         */
         barcode_2?: string;
+        /**
+         * 第三段條碼 (type = 'barcode')
+         */
         barcode_3?: string;
     };
+    /**
+     * 第三方付款資訊
+     */
     thirdParty?: {
         tradeNo: string;
         paymentType: string;
         amount: number;
     };
+    /**
+     * 物流資訊
+     */
     delivery?: {
+        /**
+         * 物流單號
+         */
         orderNo: string;
+        /**
+         * 取貨人姓名
+         */
         name: string;
+        /**
+         * 取貨人電話
+         */
         phone?: string;
+        /**
+         * 取貨時付款
+         */
         payAtPickup: boolean;
+        /**
+         * 地址描述
+         */
         addressDescription: string;
+        /**
+         * 縣市
+         */
         county?: string;
+        /**
+         * 區
+         */
         district?: string;
+        /**
+         * 第一段地址
+         */
         address_1?: string;
+        /**
+         * 第二段地址
+         */
         address_2?: string;
+        /**
+         * 完整地址
+         */
         fullAddress: string;
     };
 }
