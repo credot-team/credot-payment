@@ -1,8 +1,8 @@
 import { PaidResult as IPaidResult, PaidResultOptions, PayInfo } from '../PaidResult';
 import { OrderStatus } from '../OrderStatus';
 import { PaidResultFields } from './PaidResultFields';
-import { AcceptMethods } from './Configuration';
-export declare class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true, unknown>> {
+import { AcceptMethods, NewebpayEnvironmentParameters } from './Configuration';
+export declare class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true, unknown>, NewebpayEnvironmentParameters> {
     poweredBy(): string;
     private _payInfo;
     private readonly _result;
@@ -10,10 +10,11 @@ export declare class PaidResult extends IPaidResult<AcceptMethods, PaidResultFie
     private readonly _finishedAt;
     private readonly _isSucceed;
     private readonly _status;
-    constructor(result: PaidResultFields<false, AcceptMethods>, options?: PaidResultOptions<AcceptMethods>);
+    constructor(result: PaidResultFields<false, AcceptMethods>, options?: PaidResultOptions<AcceptMethods, NewebpayEnvironmentParameters>);
+    getEnvParams(): NewebpayEnvironmentParameters;
     parse(): void;
-    static decryptTradeInfo(tradeInfo: string): string;
-    static hashTradeInfo(tradeInfo: string): string;
+    static decryptTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters): string;
+    static hashTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters): string;
     merchantId(): string;
     merchantName(): string | undefined;
     isPaid(): boolean;

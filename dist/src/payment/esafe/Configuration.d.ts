@@ -1,7 +1,7 @@
 import { Configuration } from '../Configuration';
 import { PayMethods } from '../PayMethods';
 export declare type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst;
-interface EsafeEnvironmentParameters {
+export interface EsafeEnvironmentParameters {
     paymentApiHost: string;
     merchantId: {
         [key in PayMethods]: string;
@@ -12,4 +12,3 @@ interface EsafeEnvironmentParameters {
     invoicePassword: string;
 }
 export declare const configuration: Configuration<EsafeEnvironmentParameters>;
-export {};

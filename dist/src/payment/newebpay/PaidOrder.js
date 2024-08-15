@@ -36,15 +36,19 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
      * @param payMethod
      * @param params 訂單資訊
      */
-    constructor(payMethod, params) {
-        super(payMethod, params);
+    constructor(payMethod, params, options) {
+        super(payMethod, params, options);
         this.parseTradeInfo();
+    }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
     }
     parseTradeInfo() {
         var _a, _b, _c, _d, _e;
         const payMethods = this.payMethod();
         const params = this.params;
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         const langType = params.locale === Locales_1.Locales.en_US ? 'en' : params.locale === Locales_1.Locales.ja ? 'jp' : 'zh-tw';
         const args = {
             MerchantID: env.merchantId,
@@ -99,29 +103,27 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
                     break;
             }
         }
-        const encryptedTradeInfo = PaidOrder.encryptTradeInfo(args);
+        const encryptedTradeInfo = PaidOrder.encryptTradeInfo(args, env);
         this._apiParams = {
             TradeInfo: encryptedTradeInfo,
-            TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo),
+            TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo, env),
             MerchantID: env.merchantId,
             Version: API_VERSION,
         };
         this._tradeInfo = args;
     }
-    static encryptTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
+    static encryptTradeInfo(tradeInfo, envParams) {
         const params = new URLSearchParams();
         Object.entries(tradeInfo).forEach(([k, v]) => v !== undefined && v !== null && params.set(k, v));
         const qs = params.toString();
-        return crypto_js_1.AES.encrypt(qs, crypto_js_1.default.enc.Utf8.parse(env.hashKey), {
-            iv: crypto_js_1.default.enc.Utf8.parse(env.hashIV),
+        return crypto_js_1.AES.encrypt(qs, crypto_js_1.default.enc.Utf8.parse(envParams.hashKey), {
+            iv: crypto_js_1.default.enc.Utf8.parse(envParams.hashIV),
             mode: crypto_js_1.default.mode.CBC,
             padding: crypto_js_1.default.pad.Pkcs7,
         }).toString(crypto_js_1.default.format.Hex);
     }
-    static hashTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
-        return (0, crypto_js_1.SHA256)(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+    static hashTradeInfo(tradeInfo, envParams) {
+        return (0, crypto_js_1.SHA256)(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
             .toString()
             .toUpperCase();
     }
@@ -132,7 +134,7 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
         return this._apiParams.TradeSha;
     }
     apply() {
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         const data = {
             properties: {
                 method: 'post',

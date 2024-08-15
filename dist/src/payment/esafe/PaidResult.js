@@ -37,6 +37,10 @@ class PaidResult extends PaidResult_1.PaidResult {
     poweredBy() {
         return _1.PoweredBy;
     }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
+    }
     payInfo() {
         return {
             payerName: this._rawData.Name,
@@ -85,7 +89,7 @@ class PaidResult extends PaidResult_1.PaidResult {
     }
     isValid() {
         let localChkValue = '';
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         switch (this.payMethod()) {
             case PayMethods_1.PayMethods.Credit:
             case PayMethods_1.PayMethods.CreditInst:

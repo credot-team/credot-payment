@@ -35,19 +35,24 @@ const Configuration_1 = require("./Configuration");
 const PaymentMethod_1 = require("./PaymentMethod");
 class PaidResult extends PaidResult_1.PaidResult {
     constructor(result, options) {
-        var _a, _b, _c;
-        const tradeInfo = JSON.parse(PaidResult.decryptTradeInfo(result.TradeInfo));
-        super(Object.assign(Object.assign({}, result), { TradeInfo: tradeInfo }), { payMethod: (_a = options === null || options === void 0 ? void 0 : options.payMethod) !== null && _a !== void 0 ? _a : PaymentMethod_1.PaymentTypes[tradeInfo.Result.PaymentType] });
-        this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo);
+        var _a, _b, _c, _d;
+        const env = (_a = options === null || options === void 0 ? void 0 : options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
+        const tradeInfo = JSON.parse(PaidResult.decryptTradeInfo(result.TradeInfo, env));
+        super(Object.assign(Object.assign({}, result), { TradeInfo: tradeInfo }), { payMethod: (_b = options === null || options === void 0 ? void 0 : options.payMethod) !== null && _b !== void 0 ? _b : PaymentMethod_1.PaymentTypes[tradeInfo.Result.PaymentType] });
+        this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo, env);
         this._result = tradeInfo.Result;
         this._finishedAt =
-            (_b = options === null || options === void 0 ? void 0 : options.finishedAt) !== null && _b !== void 0 ? _b : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
-        this._status = (0, ErrorCode_1.parseErrorCode)((_c = this._rawData.TradeInfo.Status) !== null && _c !== void 0 ? _c : '');
+            (_c = options === null || options === void 0 ? void 0 : options.finishedAt) !== null && _c !== void 0 ? _c : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
+        this._status = (0, ErrorCode_1.parseErrorCode)((_d = this._rawData.TradeInfo.Status) !== null && _d !== void 0 ? _d : '');
         this._isSucceed = this._status === OrderStatus_1.OrderStatus.success;
         this.parse();
     }
     poweredBy() {
         return _1.PoweredBy;
+    }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
     }
     parse() {
         var _a, _b, _c, _d;
@@ -131,21 +136,19 @@ class PaidResult extends PaidResult_1.PaidResult {
         }
         this._payInfo = payInfo;
     }
-    static decryptTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
+    static decryptTradeInfo(tradeInfo, envParams) {
         const str = crypto_js_1.default.enc.Hex.parse(tradeInfo);
         const cipherParams = crypto_js_1.default.lib.CipherParams.create({
             ciphertext: str,
             padding: crypto_js_1.default.pad.Pkcs7,
         });
-        return crypto_js_1.AES.decrypt(cipherParams, crypto_js_1.default.enc.Utf8.parse(env.hashKey), {
-            iv: crypto_js_1.default.enc.Utf8.parse(env.hashIV),
+        return crypto_js_1.AES.decrypt(cipherParams, crypto_js_1.default.enc.Utf8.parse(envParams.hashKey), {
+            iv: crypto_js_1.default.enc.Utf8.parse(envParams.hashIV),
             mode: crypto_js_1.default.mode.CBC,
         }).toString(crypto_js_1.default.enc.Utf8);
     }
-    static hashTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
-        return (0, crypto_js_1.SHA256)(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+    static hashTradeInfo(tradeInfo, envParams) {
+        return (0, crypto_js_1.SHA256)(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
             .toString()
             .toUpperCase();
     }

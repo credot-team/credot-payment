@@ -1,5 +1,6 @@
 import { CVSCOM_Types, PayMethods } from './PayMethods';
 import { Locales } from './Locales';
+import { Configuration } from './Configuration';
 export interface HtmlFormPostParams {
     properties: {
         method: 'get' | 'post';
@@ -110,19 +111,24 @@ export declare type PaidOrderParams<AcceptMethods extends PayMethods, Custom ext
      */
     cvscom?: AcceptMethods extends PayMethods.CVSCOM ? CVSCOMParameters : undefined;
 };
+export interface PaidOrderOptions<EnvParams> {
+    env?: ReturnType<Configuration<EnvParams>['getEnvParams']>;
+}
 /**
  * 付款訂單
  */
-export declare abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends CustomFieldsType> {
+export declare abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends CustomFieldsType, EnvParams extends Record<string, any>> {
     private readonly _payMethods;
     private readonly _params;
+    protected readonly _options: PaidOrderOptions<EnvParams>;
     get params(): PaidOrderParams<AcceptMethods, Custom>;
     /**
      *
      * @param payMethod
      * @param params 訂單資訊
      */
-    protected constructor(payMethod: AcceptMethods | AcceptMethods[], params: PaidOrderParams<AcceptMethods, Custom>);
+    protected constructor(payMethod: AcceptMethods | AcceptMethods[], params: PaidOrderParams<AcceptMethods, Custom>, options?: PaidOrderOptions<EnvParams>);
+    abstract getEnvParams(): EnvParams;
     abstract poweredBy(): string;
     payMethod(): AcceptMethods[];
     orderNo(): string;
