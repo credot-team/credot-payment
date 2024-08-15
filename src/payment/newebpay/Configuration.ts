@@ -20,7 +20,7 @@ export type AcceptMethods =
   | PayMethods.ezPay_Wechat
   | PayMethods.ezPay_Alipay;
 
-interface NewebpayEnvironmentParameters {
+export interface NewebpayEnvironmentParameters {
   /**
    * 付款API host
    */

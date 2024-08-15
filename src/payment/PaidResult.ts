@@ -1,15 +1,17 @@
 import { PayMethods } from './PayMethods';
 import { OrderStatus } from './OrderStatus';
 import { StoreTypes } from './StoreTypes';
+import { Configuration } from './Configuration';
 
-export interface PaidResultOptions<AcceptMethods extends PayMethods> {
-  payMethod: AcceptMethods;
+export interface PaidResultOptions<AcceptMethods extends PayMethods, EnvParams> {
+  payMethod?: AcceptMethods;
   finishedAt?: Date;
   isFromBrowser?: boolean;
   merchantName?: string;
   payerName?: string;
   payerPhone?: string;
   payerEmail?: string;
+  env?: ReturnType<Configuration<EnvParams>['getEnvParams']>;
 }
 
 export interface PayInfo {
@@ -170,16 +172,27 @@ export interface PayInfo {
 export abstract class PaidResult<
   AcceptMethods extends PayMethods,
   PaidResultFields extends Record<string, any>,
+  EnvParams extends Record<string, any>,
 > {
-  protected readonly _options: PaidResultOptions<AcceptMethods>;
+  protected readonly _options: PaidResultOptions<AcceptMethods, EnvParams>;
   protected readonly _rawData: PaidResultFields;
   private readonly _payMethod: AcceptMethods;
 
-  protected constructor(result: PaidResultFields, options: PaidResultOptions<AcceptMethods>) {
+  protected constructor(
+    result: PaidResultFields,
+    options: PaidResultOptions<AcceptMethods, EnvParams>,
+  ) {
     this._rawData = { ...result };
+
+    if (!options.payMethod) {
+      throw new Error('PayMethod is undefined or null.');
+    }
+
     this._payMethod = options.payMethod;
     this._options = options;
   }
+
+  abstract getEnvParams(): EnvParams;
 
   /**
    * 原始資料 (若資料經過加密，則回傳解密後的資料)

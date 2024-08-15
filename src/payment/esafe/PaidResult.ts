@@ -8,11 +8,15 @@ import { OrderStatus } from '../OrderStatus';
 import { PaidResultFields } from './PaidResultFields';
 import { PoweredBy } from './';
 import { parseErrorCode } from './ErrorCode';
-import { AcceptMethods, configuration } from './Configuration';
+import { AcceptMethods, configuration, EsafeEnvironmentParameters } from './Configuration';
 
 dayjs.extend(customParseFormat);
 
-export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields> {
+export class PaidResult extends IPaidResult<
+  AcceptMethods,
+  PaidResultFields,
+  EsafeEnvironmentParameters
+> {
   poweredBy(): string {
     return PoweredBy;
   }
@@ -21,7 +25,10 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields> {
   private readonly _isSucceed: boolean;
   private readonly _status: OrderStatus;
 
-  constructor(result: PaidResultFields, options: PaidResultOptions<AcceptMethods>) {
+  constructor(
+    result: PaidResultFields,
+    options: PaidResultOptions<AcceptMethods, EsafeEnvironmentParameters>,
+  ) {
     if (!options?.payMethod)
       throw new Error(`options.payMethod should be provided for ${PoweredBy} result`);
 
@@ -40,6 +47,10 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields> {
         : new Date());
     this._status = parseErrorCode(this._rawData.errcode ?? '');
     this._isSucceed = this._status === OrderStatus.success;
+  }
+
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
   }
 
   payInfo(): PayInfo {
@@ -98,7 +109,7 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields> {
 
   isValid(): boolean {
     let localChkValue = '';
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
     switch (this.payMethod()) {
       case PayMethods.Credit:
       case PayMethods.CreditInst:

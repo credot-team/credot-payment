@@ -6,12 +6,13 @@ import {
   OrderApplyResult,
   PaidOrder as IPaidOrder,
   PaidOrderParams,
+  PaidOrderOptions,
 } from '../PaidOrder';
 import { CVSCOM_Types, PayMethods } from '../PayMethods';
 import { Locales } from '../Locales';
 import { PoweredBy } from './';
 import { PaidOrderFields, TradeInfo } from './PaidOrderFields';
-import { AcceptMethods, configuration } from './Configuration';
+import { AcceptMethods, configuration, NewebpayEnvironmentParameters } from './Configuration';
 
 interface CustomFields extends CustomFieldsType {
   /**
@@ -29,7 +30,8 @@ const API_VERSION = '2.0';
 
 export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   AcceptMethods,
-  CustomFields
+  CustomFields,
+  NewebpayEnvironmentParameters
 > {
   private _tradeInfo: TradeInfo | undefined;
   private _apiParams: PaidOrderFields | undefined;
@@ -42,15 +44,20 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   constructor(
     payMethod: EnableMethods | EnableMethods[],
     params: PaidOrderParams<EnableMethods, CustomFields>,
+    options?: PaidOrderOptions<NewebpayEnvironmentParameters>,
   ) {
-    super(payMethod, params);
+    super(payMethod, params, options);
     this.parseTradeInfo();
+  }
+
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
   }
 
   parseTradeInfo() {
     const payMethods = this.payMethod();
     const params = this.params;
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
 
     const langType: TradeInfo['LangType'] =
       params.locale === Locales.en_US ? 'en' : params.locale === Locales.ja ? 'jp' : 'zh-tw';
@@ -110,33 +117,31 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       }
     }
 
-    const encryptedTradeInfo = PaidOrder.encryptTradeInfo(args);
+    const encryptedTradeInfo = PaidOrder.encryptTradeInfo(args, env);
     this._apiParams = {
       TradeInfo: encryptedTradeInfo,
-      TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo),
+      TradeSha: PaidOrder.hashTradeInfo(encryptedTradeInfo, env),
       MerchantID: env.merchantId,
       Version: API_VERSION,
     };
     this._tradeInfo = args;
   }
 
-  static encryptTradeInfo(tradeInfo: TradeInfo) {
-    const env = configuration.getEnvParams();
+  static encryptTradeInfo(tradeInfo: TradeInfo, envParams: NewebpayEnvironmentParameters) {
     const params = new URLSearchParams();
     Object.entries(tradeInfo).forEach(
       ([k, v]) => v !== undefined && v !== null && params.set(k, v as any),
     );
     const qs = params.toString();
-    return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(env.hashKey), {
-      iv: CryptoJS.enc.Utf8.parse(env.hashIV),
+    return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(envParams.hashKey), {
+      iv: CryptoJS.enc.Utf8.parse(envParams.hashIV),
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
     }).toString(CryptoJS.format.Hex);
   }
 
-  static hashTradeInfo(tradeInfo: string) {
-    const env = configuration.getEnvParams();
-    return SHA256(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+  static hashTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters) {
+    return SHA256(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
       .toString()
       .toUpperCase();
   }
@@ -150,7 +155,7 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   }
 
   apply(): Promise<OrderApplyResult> {
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
     const data: HtmlFormPostParams = {
       properties: {
         method: 'post',

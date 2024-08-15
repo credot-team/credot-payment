@@ -3,7 +3,7 @@ import { PayMethods } from '../PayMethods';
 
 export type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst;
 
-interface EsafeEnvironmentParameters {
+export interface EsafeEnvironmentParameters {
   //付款API host
   paymentApiHost: string;
 

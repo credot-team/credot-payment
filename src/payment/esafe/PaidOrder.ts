@@ -10,13 +10,14 @@ import {
   OrderApplyResult,
   PaidOrder as IPaidOrder,
   PaidOrderParams,
+  PaidOrderOptions,
 } from '../PaidOrder';
 import { PayMethods } from '../PayMethods';
 import { Locales } from '../Locales';
 import { PoweredBy } from './';
 import { PaidOrderFields } from './PaidOrderFields';
 import { PaidResult } from './PaidResult';
-import { AcceptMethods, configuration } from './Configuration';
+import { AcceptMethods, configuration, EsafeEnvironmentParameters } from './Configuration';
 
 dayjs.extend(customParseFormat);
 
@@ -37,17 +38,19 @@ interface CustomFields extends CustomFieldsType {
 
 export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   AcceptMethods,
-  CustomFields
+  CustomFields,
+  EsafeEnvironmentParameters
 > {
   private readonly _checksum: string;
 
   constructor(
     payMethod: EnableMethods | EnableMethods[],
     params: PaidOrderParams<EnableMethods, CustomFields>,
+    options?: PaidOrderOptions<EsafeEnvironmentParameters>,
   ) {
-    super(payMethod, params);
+    super(payMethod, params, options);
 
-    const env = configuration.getEnvParams();
+    const env = this._options.env ?? configuration.getEnvParams();
     const _params = this.params;
     this._checksum = sha1(
       env.merchantId[PayMethods.Credit] +
@@ -59,6 +62,10 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       .toUpperCase();
   }
 
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
+  }
+
   poweredBy(): string {
     return PoweredBy;
   }
@@ -68,7 +75,7 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
   }
 
   apply(): Promise<OrderApplyResult> {
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
     const params = this.params;
 
     const args: PaidOrderFields = {
@@ -116,8 +123,11 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
    * 即時交易查詢
    * @param args
    */
-  public static fetchStatus<T>(args: IncludeAnyOne<T, FetchStatusArgs>) {
-    const env = configuration.getEnvParams();
+  public static fetchStatus<T>(
+    args: IncludeAnyOne<T, FetchStatusArgs>,
+    envParams?: EsafeEnvironmentParameters,
+  ) {
+    const env = envParams ?? configuration.getEnvParams();
     const url = env.paymentApiHost + '/PaymentCheck.aspx';
     if (isEmpty(args.orderNo) && isEmpty(args.applyNo)) return Promise.resolve(undefined);
 

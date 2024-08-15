@@ -8,7 +8,7 @@ import { StoreTypes } from '../StoreTypes';
 import { PoweredBy } from './';
 import { PaidResultFields } from './PaidResultFields';
 import { parseErrorCode, parseErrorMessage } from './ErrorCode';
-import { AcceptMethods, configuration } from './Configuration';
+import { AcceptMethods, configuration, NewebpayEnvironmentParameters } from './Configuration';
 import { CreditType, PaymentTypes } from './PaymentMethod';
 
 type TradeResult<PayMethod extends PayMethods | unknown> = PaidResultFields<
@@ -16,7 +16,11 @@ type TradeResult<PayMethod extends PayMethods | unknown> = PaidResultFields<
   PayMethod
 >['TradeInfo']['Result'];
 
-export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true, unknown>> {
+export class PaidResult extends IPaidResult<
+  AcceptMethods,
+  PaidResultFields<true, unknown>,
+  NewebpayEnvironmentParameters
+> {
   poweredBy(): string {
     return PoweredBy;
   }
@@ -30,17 +34,18 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true
 
   constructor(
     result: PaidResultFields<false, AcceptMethods>,
-    options?: PaidResultOptions<AcceptMethods>,
+    options?: PaidResultOptions<AcceptMethods, NewebpayEnvironmentParameters>,
   ) {
+    const env = options?.env ?? configuration.getEnvParams();
     const tradeInfo: PaidResultFields<true, unknown>['TradeInfo'] = JSON.parse(
-      PaidResult.decryptTradeInfo(result.TradeInfo),
+      PaidResult.decryptTradeInfo(result.TradeInfo, env),
     );
     super(
       { ...result, TradeInfo: tradeInfo },
       { payMethod: options?.payMethod ?? (PaymentTypes[tradeInfo.Result.PaymentType] as any) },
     );
 
-    this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo);
+    this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo, env);
     this._result = tradeInfo.Result;
     this._finishedAt =
       options?.finishedAt ??
@@ -48,6 +53,10 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true
     this._status = parseErrorCode(this._rawData.TradeInfo.Status ?? '');
     this._isSucceed = this._status === OrderStatus.success;
     this.parse();
+  }
+
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
   }
 
   parse() {
@@ -133,22 +142,20 @@ export class PaidResult extends IPaidResult<AcceptMethods, PaidResultFields<true
     this._payInfo = payInfo;
   }
 
-  static decryptTradeInfo(tradeInfo: string) {
-    const env = configuration.getEnvParams();
+  static decryptTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters) {
     const str = CryptoJS.enc.Hex.parse(tradeInfo);
     const cipherParams = CryptoJS.lib.CipherParams.create({
       ciphertext: str,
       padding: CryptoJS.pad.Pkcs7,
     });
-    return AES.decrypt(cipherParams, CryptoJS.enc.Utf8.parse(env.hashKey), {
-      iv: CryptoJS.enc.Utf8.parse(env.hashIV),
+    return AES.decrypt(cipherParams, CryptoJS.enc.Utf8.parse(envParams.hashKey), {
+      iv: CryptoJS.enc.Utf8.parse(envParams.hashIV),
       mode: CryptoJS.mode.CBC,
     }).toString(CryptoJS.enc.Utf8);
   }
 
-  static hashTradeInfo(tradeInfo: string) {
-    const env = configuration.getEnvParams();
-    return SHA256(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+  static hashTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters) {
+    return SHA256(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
       .toString()
       .toUpperCase();
   }

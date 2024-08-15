@@ -1,5 +1,6 @@
 import { CVSCOM_Types, PayMethods } from './PayMethods';
 import { Locales } from './Locales';
+import { Configuration } from './Configuration';
 
 export interface HtmlFormPostParams {
   properties: {
@@ -135,12 +136,22 @@ export type PaidOrderParams<AcceptMethods extends PayMethods, Custom extends Cus
   cvscom?: AcceptMethods extends PayMethods.CVSCOM ? CVSCOMParameters : undefined;
 };
 
+export interface PaidOrderOptions<EnvParams> {
+  env?: ReturnType<Configuration<EnvParams>['getEnvParams']>;
+}
+
 /**
  * 付款訂單
  */
-export abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends CustomFieldsType> {
+export abstract class PaidOrder<
+  AcceptMethods extends PayMethods,
+  Custom extends CustomFieldsType,
+  EnvParams extends Record<string, any>,
+> {
   private readonly _payMethods: AcceptMethods[];
   private readonly _params: PaidOrderParams<AcceptMethods, Custom>;
+  protected readonly _options: PaidOrderOptions<EnvParams>;
+
   get params(): PaidOrderParams<AcceptMethods, Custom> {
     return this._params;
   }
@@ -153,10 +164,14 @@ export abstract class PaidOrder<AcceptMethods extends PayMethods, Custom extends
   protected constructor(
     payMethod: AcceptMethods | AcceptMethods[],
     params: PaidOrderParams<AcceptMethods, Custom>,
+    options?: PaidOrderOptions<EnvParams>,
   ) {
     this._payMethods = Array.isArray(payMethod) ? payMethod : [payMethod];
     this._params = { ...params };
+    this._options = options ?? {};
   }
+
+  abstract getEnvParams(): EnvParams;
 
   abstract poweredBy(): string;
 
