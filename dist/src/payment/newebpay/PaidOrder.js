@@ -68,6 +68,7 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
             RespondType: 'JSON',
             Version: API_VERSION,
             CREDIT: payMethods.includes(PayMethods_1.PayMethods.Credit) ? 1 : 0,
+            APPLEPAY: payMethods.includes(PayMethods_1.PayMethods.ApplePay) ? 1 : 0,
             ANDROIDPAY: payMethods.includes(PayMethods_1.PayMethods.GooglePay) ? 1 : 0,
             SAMSUNGPAY: payMethods.includes(PayMethods_1.PayMethods.SamsungPay) ? 1 : 0,
             LINEPAY: payMethods.includes(PayMethods_1.PayMethods.LinePay) ? 1 : 0,

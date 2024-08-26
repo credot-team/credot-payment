@@ -66,6 +66,10 @@ exports.CreditType = {
      */
     UNIONPAY: '銀聯卡',
     /**
+     * Apple Pay
+     */
+    APPLEPAY: 'ApplePay',
+    /**
      * Google Pay
      */
     GOOGLEPAY: 'GooglePay',

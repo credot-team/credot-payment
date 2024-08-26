@@ -24,6 +24,10 @@ var PayMethods;
      */
     PayMethods["WebATM"] = "web-atm";
     /**
+     * Apple Pay
+     */
+    PayMethods["ApplePay"] = "apple-pay";
+    /**
      * Google Pay
      */
     PayMethods["GooglePay"] = "google-pay";

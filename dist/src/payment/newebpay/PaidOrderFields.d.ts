@@ -200,6 +200,16 @@ export declare type TradeInfo = {
      */
     CREDIT?: 0 | 1;
     /**
+     * Apple Pay 啟用
+     *
+     * 設定是否啟用 Apple Pay 支付方式。
+     * - 1 = 啟用
+     * - 0 = 不啟用
+     *
+     * 當未提供此參數時表示不啟用。
+     */
+    APPLEPAY?: 0 | 1;
+    /**
      * Google Pay 啟用
      *
      * 設定是否啟用 Google Pay 支付方式。

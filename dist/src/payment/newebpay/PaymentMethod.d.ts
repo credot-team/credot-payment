@@ -63,6 +63,10 @@ export declare const CreditType: {
      */
     UNIONPAY: string;
     /**
+     * Apple Pay
+     */
+    APPLEPAY: string;
+    /**
      * Google Pay
      */
     GOOGLEPAY: string;

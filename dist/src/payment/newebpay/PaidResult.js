@@ -67,6 +67,7 @@ class PaidResult extends PaidResult_1.PaidResult {
             case PayMethods_1.PayMethods.CreditInst:
             case PayMethods_1.PayMethods.SamsungPay:
             case PayMethods_1.PayMethods.GooglePay:
+            case PayMethods_1.PayMethods.ApplePay:
             case PayMethods_1.PayMethods.UnionPay:
             case PayMethods_1.PayMethods.Credit:
                 result = unknownResult;
