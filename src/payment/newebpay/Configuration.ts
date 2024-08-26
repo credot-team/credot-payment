@@ -5,6 +5,7 @@ export type AcceptMethods =
   | PayMethods.Credit
   | PayMethods.CreditInst
   | PayMethods.CreditReward
+  | PayMethods.ApplePay
   | PayMethods.GooglePay
   | PayMethods.SamsungPay
   | PayMethods.LinePay

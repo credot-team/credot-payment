@@ -81,6 +81,7 @@ export class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<
       Version: API_VERSION,
 
       CREDIT: payMethods.includes(PayMethods.Credit) ? 1 : 0,
+      APPLEPAY: payMethods.includes(PayMethods.ApplePay) ? 1 : 0,
       ANDROIDPAY: payMethods.includes(PayMethods.GooglePay) ? 1 : 0,
       SAMSUNGPAY: payMethods.includes(PayMethods.SamsungPay) ? 1 : 0,
       LINEPAY: payMethods.includes(PayMethods.LinePay) ? 1 : 0,

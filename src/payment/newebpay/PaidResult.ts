@@ -71,6 +71,7 @@ export class PaidResult extends IPaidResult<
       case PayMethods.CreditInst:
       case PayMethods.SamsungPay:
       case PayMethods.GooglePay:
+      case PayMethods.ApplePay:
       case PayMethods.UnionPay:
       case PayMethods.Credit:
         result = unknownResult as TradeResult<PayMethods.Credit>;

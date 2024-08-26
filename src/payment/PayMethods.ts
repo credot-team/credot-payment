@@ -25,6 +25,11 @@ export enum PayMethods {
   WebATM = 'web-atm',
 
   /**
+   * Apple Pay
+   */
+  ApplePay = 'apple-pay',
+
+  /**
    * Google Pay
    */
   GooglePay = 'google-pay',
