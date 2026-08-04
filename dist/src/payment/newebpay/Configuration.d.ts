@@ -41,5 +41,13 @@ export interface NewebpayEnvironmentParameters {
      */
     hashIV: string;
 }
-export declare const configuration: Configuration<NewebpayEnvironmentParameters>;
-export {};
+
+export declare type ResolvedNewebpayEnvironmentParameters = NewebpayEnvironmentParameters & {
+    creditCardApiUrl: string;
+    tokenQueryApiUrl: string;
+    tokenUnbindApiUrl: string;
+};
+export declare const configuration: {
+    getEnvParams(): ResolvedNewebpayEnvironmentParameters;
+    setEnvParams(params: NewebpayEnvironmentParameters): void;
+};
