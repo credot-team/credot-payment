@@ -4,6 +4,9 @@ exports.PaidResult = void 0;
 class PaidResult {
     constructor(result, options) {
         this._rawData = Object.assign({}, result);
+        if (!options.payMethod) {
+            throw new Error('PayMethod is undefined or null.');
+        }
         this._payMethod = options.payMethod;
         this._options = options;
     }

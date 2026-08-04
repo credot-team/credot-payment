@@ -1,8 +1,8 @@
-import { CustomFieldsType, OrderApplyResult, PaidOrder as IPaidOrder, PaidOrderParams } from '../PaidOrder';
+import { CustomFieldsType, OrderApplyResult, PaidOrder as IPaidOrder, PaidOrderParams, PaidOrderOptions } from '../PaidOrder';
 import { Locales } from '../Locales';
 import { PaidOrderFields } from './PaidOrderFields';
 import { PaidResult } from './PaidResult';
-import { AcceptMethods } from './Configuration';
+import { AcceptMethods, EsafeEnvironmentParameters } from './Configuration';
 declare type FetchStatusArgs = {
     applyNo?: string;
     orderNo?: string;
@@ -12,9 +12,10 @@ interface CustomFields extends CustomFieldsType {
     installment: PaidOrderFields['Term'];
     locale: Locales.zh_TW | Locales.en_US | Locales.ja;
 }
-export declare class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<AcceptMethods, CustomFields> {
+export declare class PaidOrder<EnableMethods extends AcceptMethods> extends IPaidOrder<AcceptMethods, CustomFields, EsafeEnvironmentParameters> {
     private readonly _checksum;
-    constructor(payMethod: EnableMethods | EnableMethods[], params: PaidOrderParams<EnableMethods, CustomFields>);
+    constructor(payMethod: EnableMethods | EnableMethods[], params: PaidOrderParams<EnableMethods, CustomFields>, options?: PaidOrderOptions<EsafeEnvironmentParameters>);
+    getEnvParams(): EsafeEnvironmentParameters;
     poweredBy(): string;
     checksum(): string;
     apply(): Promise<OrderApplyResult>;
@@ -22,6 +23,6 @@ export declare class PaidOrder<EnableMethods extends AcceptMethods> extends IPai
      * 即時交易查詢
      * @param args
      */
-    static fetchStatus<T>(args: IncludeAnyOne<T, FetchStatusArgs>): Promise<undefined> | Promise<PaidResult[]>;
+    static fetchStatus<T>(args: IncludeAnyOne<T, FetchStatusArgs>, envParams?: EsafeEnvironmentParameters): Promise<undefined> | Promise<PaidResult[]>;
 }
 export {};

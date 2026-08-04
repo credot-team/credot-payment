@@ -1,6 +1,6 @@
 import { PayMethods } from '../PayMethods';
-export declare type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst | PayMethods.CreditReward | PayMethods.GooglePay | PayMethods.SamsungPay | PayMethods.LinePay | PayMethods.UnionPay | PayMethods.WebATM | PayMethods.VACC | PayMethods.CVS | PayMethods.CVSBarcode | PayMethods.EsunWallet | PayMethods.TaiwanPay | PayMethods.CVSCOM | PayMethods.ezPay | PayMethods.ezPay_Wechat | PayMethods.ezPay_Alipay;
-export declare type NewebpayEnvironmentParameters = {
+export declare type AcceptMethods = PayMethods.Credit | PayMethods.CreditInst | PayMethods.CreditReward | PayMethods.ApplePay | PayMethods.GooglePay | PayMethods.SamsungPay | PayMethods.LinePay | PayMethods.UnionPay | PayMethods.WebATM | PayMethods.VACC | PayMethods.CVS | PayMethods.CVSBarcode | PayMethods.EsunWallet | PayMethods.TaiwanPay | PayMethods.CVSCOM | PayMethods.ezPay | PayMethods.ezPay_Wechat | PayMethods.ezPay_Alipay;
+export interface NewebpayEnvironmentParameters {
     /**
      * 付款API host (MPG 幕前)
      */
@@ -40,13 +40,6 @@ export declare type NewebpayEnvironmentParameters = {
      * HashIV
      */
     hashIV: string;
-};
-export declare type ResolvedNewebpayEnvironmentParameters = NewebpayEnvironmentParameters & {
-    creditCardApiUrl: string;
-    tokenQueryApiUrl: string;
-    tokenUnbindApiUrl: string;
-};
-export declare const configuration: {
-    getEnvParams(): ResolvedNewebpayEnvironmentParameters;
-    setEnvParams(params: NewebpayEnvironmentParameters): void;
-};
+}
+export declare const configuration: Configuration<NewebpayEnvironmentParameters>;
+export {};

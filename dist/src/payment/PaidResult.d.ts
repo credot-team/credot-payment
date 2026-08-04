@@ -1,14 +1,16 @@
 import { PayMethods } from './PayMethods';
 import { OrderStatus } from './OrderStatus';
 import { StoreTypes } from './StoreTypes';
-export interface PaidResultOptions<AcceptMethods extends PayMethods> {
-    payMethod: AcceptMethods;
+import { Configuration } from './Configuration';
+export interface PaidResultOptions<AcceptMethods extends PayMethods, EnvParams> {
+    payMethod?: AcceptMethods;
     finishedAt?: Date;
     isFromBrowser?: boolean;
     merchantName?: string;
     payerName?: string;
     payerPhone?: string;
     payerEmail?: string;
+    env?: ReturnType<Configuration<EnvParams>['getEnvParams']>;
 }
 export interface PayInfo {
     /**
@@ -141,11 +143,12 @@ export interface PayInfo {
         fullAddress: string;
     };
 }
-export declare abstract class PaidResult<AcceptMethods extends PayMethods, PaidResultFields extends Record<string, any>> {
-    protected readonly _options: PaidResultOptions<AcceptMethods>;
+export declare abstract class PaidResult<AcceptMethods extends PayMethods, PaidResultFields extends Record<string, any>, EnvParams extends Record<string, any>> {
+    protected readonly _options: PaidResultOptions<AcceptMethods, EnvParams>;
     protected readonly _rawData: PaidResultFields;
     private readonly _payMethod;
-    protected constructor(result: PaidResultFields, options: PaidResultOptions<AcceptMethods>);
+    protected constructor(result: PaidResultFields, options: PaidResultOptions<AcceptMethods, EnvParams>);
+    abstract getEnvParams(): EnvParams;
     /**
      * 原始資料 (若資料經過加密，則回傳解密後的資料)
      */

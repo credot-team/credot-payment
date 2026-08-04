@@ -96,6 +96,7 @@ type Result<PayMethod extends PayMethods | unknown> = GeneralFields &
     | PayMethods.CreditReward
     | PayMethods.SamsungPay
     | PayMethods.GooglePay
+    | PayMethods.ApplePay
     | PayMethods.UnionPay
     ? CreditCardFields
     : PayMethod extends PayMethods.WebATM | PayMethods.VACC

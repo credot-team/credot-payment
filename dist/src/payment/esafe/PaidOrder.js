@@ -29,17 +29,21 @@ dayjs_1.default.extend(customParseFormat_1.default);
 // End of Types
 //=============================
 class PaidOrder extends PaidOrder_1.PaidOrder {
-    constructor(payMethod, params) {
-        var _a;
-        super(payMethod, params);
-        const env = Configuration_1.configuration.getEnvParams();
+    constructor(payMethod, params, options) {
+        var _a, _b;
+        super(payMethod, params, options);
+        const env = (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
         const _params = this.params;
         this._checksum = (0, sha1_1.default)(env.merchantId[PayMethods_1.PayMethods.Credit] +
             env.transPassword +
             _params.amount +
-            ((_a = _params.installment) !== null && _a !== void 0 ? _a : ''))
+            ((_b = _params.installment) !== null && _b !== void 0 ? _b : ''))
             .toString()
             .toUpperCase();
+    }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
     }
     poweredBy() {
         return _1.PoweredBy;
@@ -49,7 +53,7 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
     }
     apply() {
         var _a, _b, _c;
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         const params = this.params;
         const args = {
             web: env.merchantId[PayMethods_1.PayMethods.Credit],
@@ -93,8 +97,8 @@ class PaidOrder extends PaidOrder_1.PaidOrder {
      * 即時交易查詢
      * @param args
      */
-    static fetchStatus(args) {
-        const env = Configuration_1.configuration.getEnvParams();
+    static fetchStatus(args, envParams) {
+        const env = envParams !== null && envParams !== void 0 ? envParams : Configuration_1.configuration.getEnvParams();
         const url = env.paymentApiHost + '/PaymentCheck.aspx';
         if ((0, convert_1.isEmpty)(args.orderNo) && (0, convert_1.isEmpty)(args.applyNo))
             return Promise.resolve(undefined);

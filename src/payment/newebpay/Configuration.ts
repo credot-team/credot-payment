@@ -4,6 +4,7 @@ export type AcceptMethods =
   | PayMethods.Credit
   | PayMethods.CreditInst
   | PayMethods.CreditReward
+  | PayMethods.ApplePay
   | PayMethods.GooglePay
   | PayMethods.SamsungPay
   | PayMethods.LinePay
@@ -19,7 +20,7 @@ export type AcceptMethods =
   | PayMethods.ezPay_Wechat
   | PayMethods.ezPay_Alipay;
 
-export type NewebpayEnvironmentParameters = {
+export interface NewebpayEnvironmentParameters {
   /**
    * 付款API host (MPG 幕前)
    */

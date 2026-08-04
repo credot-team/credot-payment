@@ -10,9 +10,10 @@ class PaidOrder {
      * @param payMethod
      * @param params 訂單資訊
      */
-    constructor(payMethod, params) {
+    constructor(payMethod, params, options) {
         this._payMethods = Array.isArray(payMethod) ? payMethod : [payMethod];
         this._params = Object.assign({}, params);
+        this._options = options !== null && options !== void 0 ? options : {};
     }
     get params() {
         return this._params;
