@@ -4,4 +4,5 @@ export * from './PaidOrder';
 export * from './PaidResultFields';
 export * from './PaidResult';
 export * from './api';
+export * as agreement from './agreement';
 export declare const PoweredBy = "newebpay";

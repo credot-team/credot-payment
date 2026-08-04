@@ -1,21 +1,44 @@
+import { AgreementOrder } from './agreement/AgreementOrder';
+import { AgreementP1 } from './agreement/AgreementP1';
+import { AgreementPn } from './agreement/AgreementPn';
+import { TokenQuery } from './agreement/TokenQuery';
+import { TokenUnbind } from './agreement/TokenUnbind';
+
 export namespace api {
   /**
-   * 單筆交易狀態查詢
+   * 4.1 首次約定付款(P1) - 幕前情境 [NPA-F011]
    */
-  function queryTradeInfo() {}
+  export function createAgreementOrder(
+    ...args: ConstructorParameters<typeof AgreementOrder>
+  ): AgreementOrder {
+    return new AgreementOrder(...args);
+  }
 
   /**
-   * 取消信用卡授權
+   * 4.2 首次約定付款(P1) - 幕後情境 [NPA-B101]
    */
-  function creditCardCancel() {}
+  export function agreementP1(...args: ConstructorParameters<typeof AgreementP1>): AgreementP1 {
+    return new AgreementP1(...args);
+  }
 
   /**
-   * 信用卡請/退款
+   * 4.3 後續約定付款(Pn) - 幕後情境 [NPA-B102]
    */
-  function creditCardClose() {}
+  export function agreementPn(...args: ConstructorParameters<typeof AgreementPn>): AgreementPn {
+    return new AgreementPn(...args);
+  }
 
   /**
-   * 電子錢包退款
+   * 4.4 查詢約定付款綁定狀態 [NPA-B103]
    */
-  function eWalletRefund() {}
+  export function queryTokenStatus(...args: ConstructorParameters<typeof TokenQuery>): TokenQuery {
+    return new TokenQuery(...args);
+  }
+
+  /**
+   * 4.5 解除約定付款綁定 [NPA-B104]
+   */
+  export function unbindToken(...args: ConstructorParameters<typeof TokenUnbind>): TokenUnbind {
+    return new TokenUnbind(...args);
+  }
 }
