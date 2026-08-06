@@ -1,5 +1,6 @@
-import { OrderApplyResult, PaidOrderParams } from '../../PaidOrder';
+import { OrderApplyResult, PaidOrderOptions, PaidOrderParams } from '../../PaidOrder';
 import { Locales } from '../../Locales';
+import { NewebpayEnvironmentParameters } from '../Configuration';
 import { AgreementOrderTradeInfo } from './Fields';
 declare const API_VERSION = "2.3";
 export declare type AgreementOrderApiParams = {
@@ -38,12 +39,14 @@ export declare type AgreementOrderParams = Omit<PaidOrderParams<never, {
  */
 export declare class AgreementOrder {
     private readonly _params;
+    private readonly _options;
     private readonly _tradeInfo;
     private readonly _apiParams;
-    constructor(params: AgreementOrderParams);
+    constructor(params: AgreementOrderParams, options?: PaidOrderOptions<NewebpayEnvironmentParameters>);
+    getEnvParams(): NewebpayEnvironmentParameters;
     private buildTradeInfo;
-    static encryptTradeInfo(tradeInfo: AgreementOrderTradeInfo): string;
-    static hashTradeInfo(tradeInfo: string): string;
+    static encryptTradeInfo(tradeInfo: AgreementOrderTradeInfo, envParams: NewebpayEnvironmentParameters): string;
+    static hashTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters): string;
     poweredBy(): string;
     orderNo(): string;
     amount(): number;

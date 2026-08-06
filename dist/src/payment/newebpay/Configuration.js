@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.configuration = void 0;
+;
 function resolveApiBase(paymentApiUrl) {
     return paymentApiUrl.replace(/\/MPG\/mpg_gateway\/?$/i, '');
 }

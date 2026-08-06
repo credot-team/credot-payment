@@ -57,6 +57,23 @@ function getReqBody(req) {
         req.on('error', (err) => reject(err));
     });
 }
+/**
+ * 約定付款 P1 成功時，TradeInfo.Result 會包含 TokenValue。
+ * 外層 Status / TradeInfo / TradeSha 格式與一般 MPG 相同，需解密後才能區分。
+ */
+function isAgreementNotify(payload) {
+    try {
+        const decrypted = JSON.parse(index_1.newebpay.PaidResult.decryptTradeInfo(payload.TradeInfo, newebpayConfig));
+        const result = decrypted.Result;
+        return Boolean(result.TokenValue);
+    }
+    catch (_a) {
+        return false;
+    }
+}
+function parseNotifyPayload(body) {
+    return querystring.parse(body);
+}
 const routes = {
     '/': (req, res) => {
         res.statusCode = 200;
@@ -65,7 +82,7 @@ const routes = {
     },
     '/newebpay/notify': (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const body = yield getReqBody(req);
-        const payload = querystring.parse(body);
+        const payload = parseNotifyPayload(body);
         const paidResult = new index_1.newebpay.PaidResult(payload);
         console.log('PaidResult Object:', paidResult);
         console.log('PaidResult info:', {
@@ -78,6 +95,44 @@ const routes = {
         // you MUST return 200(OK) to tell the 3rd-party server this notify is success, or it will try to notify again and again
         res.statusCode = 200;
         res.end(paidResult.successResponse());
+    }),
+    /**
+     * 同一 Notify URL 同時接收一般 MPG 與約定付款 P1 時，
+     * 依解密後的 Result.TokenValue 是否存在來分支處理。
+     */
+    '/newebpay/notify/auto': (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const body = yield getReqBody(req);
+        const payload = parseNotifyPayload(body);
+        if (isAgreementNotify(payload)) {
+            const agreementResult = new index_1.newebpay.agreement.AgreementResult(payload);
+            console.log('[AgreementResult] 約定付款 P1 notify');
+            console.log({
+                isValid: agreementResult.isValid(),
+                orderNo: agreementResult.orderNo(),
+                amount: agreementResult.amount(),
+                paidSuccess: agreementResult.isPaid(),
+                status: agreementResult.status(),
+                tokenValue: agreementResult.tokenValue(),
+                tokenLife: agreementResult.tokenLife(),
+                tokenUseStatus: agreementResult.tokenUseStatus(),
+                payInfo: agreementResult.payInfo(),
+            });
+            // TODO: 持久化 tokenTerm + tokenValue + tokenLife，供後續 AgreementPn 使用
+        }
+        else {
+            const paidResult = new index_1.newebpay.PaidResult(payload);
+            console.log('[PaidResult] 一般 MPG notify');
+            console.log({
+                isValid: paidResult.isValid(),
+                orderNo: paidResult.orderNo(),
+                amount: paidResult.amount(),
+                paidSuccess: paidResult.isPaid(),
+                status: paidResult.status(),
+                payInfo: paidResult.payInfo(),
+            });
+        }
+        res.statusCode = 200;
+        res.end();
     }),
     '/esafe/notify': (req, res) => {
         res.statusCode = 404;

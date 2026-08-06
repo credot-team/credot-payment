@@ -41,7 +41,6 @@ export interface NewebpayEnvironmentParameters {
      */
     hashIV: string;
 }
-
 export declare type ResolvedNewebpayEnvironmentParameters = NewebpayEnvironmentParameters & {
     creditCardApiUrl: string;
     tokenQueryApiUrl: string;

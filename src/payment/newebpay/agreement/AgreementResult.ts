@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import axios from 'axios';
 
 import { PaidResult as IPaidResult, PaidResultOptions } from '../../PaidResult';
 import { PayMethods } from '../../PayMethods';
@@ -8,6 +7,7 @@ import { PoweredBy } from '../';
 import { PaidResult } from '../PaidResult';
 import { PaidResultFields } from '../PaidResultFields';
 import { parseErrorCode, parseErrorMessage } from '../ErrorCode';
+import { configuration, NewebpayEnvironmentParameters } from '../Configuration';
 import { AgreementOrderResult } from './Fields';
 
 type RawAgreementResult = PaidResultFields<false, PayMethods.Credit>;
@@ -15,29 +15,41 @@ type RawAgreementResult = PaidResultFields<false, PayMethods.Credit>;
 /**
  * 解析 NPA-F011 幕前約定付款回傳（NotifyURL / ReturnURL）
  */
-export class AgreementResult extends IPaidResult<PayMethods.Credit, PaidResultFields<true, PayMethods.Credit>> {
+export class AgreementResult extends IPaidResult<
+  PayMethods.Credit,
+  PaidResultFields<true, PayMethods.Credit>,
+  NewebpayEnvironmentParameters
+> {
   private readonly _result: AgreementOrderResult;
   private readonly _isValid: boolean;
   private readonly _isSucceed: boolean;
   private readonly _status: OrderStatus;
   private readonly _finishedAt: Date;
 
-  constructor(result: RawAgreementResult, options?: PaidResultOptions<PayMethods.Credit>) {
+  constructor(
+    result: RawAgreementResult,
+    options?: PaidResultOptions<PayMethods.Credit, NewebpayEnvironmentParameters>,
+  ) {
+    const env = options?.env ?? configuration.getEnvParams();
     const tradeInfo: PaidResultFields<true, PayMethods.Credit>['TradeInfo'] = JSON.parse(
-      PaidResult.decryptTradeInfo(result.TradeInfo),
+      PaidResult.decryptTradeInfo(result.TradeInfo, env),
     );
     super(
       { ...result, TradeInfo: tradeInfo },
       { payMethod: PayMethods.Credit, ...options },
     );
 
-    this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo);
+    this._isValid = result.TradeSha === PaidResult.hashTradeInfo(result.TradeInfo, env);
     this._result = tradeInfo.Result as AgreementOrderResult;
     this._status = parseErrorCode(tradeInfo.Status ?? '');
     this._isSucceed = this._status === OrderStatus.success;
     this._finishedAt =
       options?.finishedAt ??
       (this._result.PayTime ? dayjs(this._result.PayTime + '+08:00').toDate() : new Date());
+  }
+
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
   }
 
   poweredBy(): string {

@@ -2,18 +2,20 @@ import { PaidResult as IPaidResult, PaidResultOptions } from '../../PaidResult';
 import { PayMethods } from '../../PayMethods';
 import { OrderStatus } from '../../OrderStatus';
 import { PaidResultFields } from '../PaidResultFields';
+import { NewebpayEnvironmentParameters } from '../Configuration';
 import { AgreementOrderResult } from './Fields';
 declare type RawAgreementResult = PaidResultFields<false, PayMethods.Credit>;
 /**
  * 解析 NPA-F011 幕前約定付款回傳（NotifyURL / ReturnURL）
  */
-export declare class AgreementResult extends IPaidResult<PayMethods.Credit, PaidResultFields<true, PayMethods.Credit>> {
+export declare class AgreementResult extends IPaidResult<PayMethods.Credit, PaidResultFields<true, PayMethods.Credit>, NewebpayEnvironmentParameters> {
     private readonly _result;
     private readonly _isValid;
     private readonly _isSucceed;
     private readonly _status;
     private readonly _finishedAt;
-    constructor(result: RawAgreementResult, options?: PaidResultOptions<PayMethods.Credit>);
+    constructor(result: RawAgreementResult, options?: PaidResultOptions<PayMethods.Credit, NewebpayEnvironmentParameters>);
+    getEnvParams(): NewebpayEnvironmentParameters;
     poweredBy(): string;
     merchantId(): string;
     merchantName(): string | undefined;

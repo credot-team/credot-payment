@@ -11,20 +11,26 @@ const OrderStatus_1 = require("../../OrderStatus");
 const __1 = require("../");
 const PaidResult_2 = require("../PaidResult");
 const ErrorCode_1 = require("../ErrorCode");
+const Configuration_1 = require("../Configuration");
 /**
  * 解析 NPA-F011 幕前約定付款回傳（NotifyURL / ReturnURL）
  */
 class AgreementResult extends PaidResult_1.PaidResult {
     constructor(result, options) {
-        var _a, _b;
-        const tradeInfo = JSON.parse(PaidResult_2.PaidResult.decryptTradeInfo(result.TradeInfo));
+        var _a, _b, _c;
+        const env = (_a = options === null || options === void 0 ? void 0 : options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
+        const tradeInfo = JSON.parse(PaidResult_2.PaidResult.decryptTradeInfo(result.TradeInfo, env));
         super(Object.assign(Object.assign({}, result), { TradeInfo: tradeInfo }), Object.assign({ payMethod: PayMethods_1.PayMethods.Credit }, options));
-        this._isValid = result.TradeSha === PaidResult_2.PaidResult.hashTradeInfo(result.TradeInfo);
+        this._isValid = result.TradeSha === PaidResult_2.PaidResult.hashTradeInfo(result.TradeInfo, env);
         this._result = tradeInfo.Result;
-        this._status = (0, ErrorCode_1.parseErrorCode)((_a = tradeInfo.Status) !== null && _a !== void 0 ? _a : '');
+        this._status = (0, ErrorCode_1.parseErrorCode)((_b = tradeInfo.Status) !== null && _b !== void 0 ? _b : '');
         this._isSucceed = this._status === OrderStatus_1.OrderStatus.success;
         this._finishedAt =
-            (_b = options === null || options === void 0 ? void 0 : options.finishedAt) !== null && _b !== void 0 ? _b : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
+            (_c = options === null || options === void 0 ? void 0 : options.finishedAt) !== null && _c !== void 0 ? _c : (this._result.PayTime ? (0, dayjs_1.default)(this._result.PayTime + '+08:00').toDate() : new Date());
+    }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
     }
     poweredBy() {
         return __1.PoweredBy;

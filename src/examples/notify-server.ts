@@ -45,7 +45,7 @@ type NotifyPayload = PaidResultFields<false, AcceptMethods>;
 function isAgreementNotify(payload: NotifyPayload): boolean {
   try {
     const decrypted = JSON.parse(
-      newebpay.PaidResult.decryptTradeInfo(payload.TradeInfo),
+      newebpay.PaidResult.decryptTradeInfo(payload.TradeInfo, newebpayConfig),
     ) as PaidResultFields<true, PayMethods.Credit>['TradeInfo'];
     const result = decrypted.Result as AgreementOrderResult;
     return Boolean(result.TokenValue);

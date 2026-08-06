@@ -29,21 +29,26 @@ const API_VERSION = '2.3';
  * 4.1 首次約定付款(P1) - 幕前情境 [NPA-F011]
  */
 class AgreementOrder {
-    constructor(params) {
+    constructor(params, options) {
         this._params = Object.assign({}, params);
+        this._options = options !== null && options !== void 0 ? options : {};
         this._tradeInfo = this.buildTradeInfo();
-        const encryptedTradeInfo = AgreementOrder.encryptTradeInfo(this._tradeInfo);
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
+        const encryptedTradeInfo = AgreementOrder.encryptTradeInfo(this._tradeInfo, env);
         this._apiParams = {
             TradeInfo: encryptedTradeInfo,
-            TradeSha: AgreementOrder.hashTradeInfo(encryptedTradeInfo),
+            TradeSha: AgreementOrder.hashTradeInfo(encryptedTradeInfo, env),
             MerchantID: env.merchantId,
             Version: API_VERSION,
         };
     }
+    getEnvParams() {
+        var _a;
+        return (_a = this._options.env) !== null && _a !== void 0 ? _a : Configuration_1.configuration.getEnvParams();
+    }
     buildTradeInfo() {
         var _a, _b;
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         const params = this._params;
         const langType = params.locale === Locales_1.Locales.en_US ? 'en' : params.locale === Locales_1.Locales.ja ? 'jp' : 'zh-tw';
         return {
@@ -74,8 +79,7 @@ class AgreementOrder {
             MobileNumberModify: params.mobileNumberModify,
         };
     }
-    static encryptTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
+    static encryptTradeInfo(tradeInfo, envParams) {
         const params = new URLSearchParams();
         Object.entries(tradeInfo).forEach(([k, v]) => {
             if (v !== undefined && v !== null) {
@@ -83,15 +87,14 @@ class AgreementOrder {
             }
         });
         const qs = params.toString();
-        return crypto_js_1.AES.encrypt(qs, crypto_js_1.default.enc.Utf8.parse(env.hashKey), {
-            iv: crypto_js_1.default.enc.Utf8.parse(env.hashIV),
+        return crypto_js_1.AES.encrypt(qs, crypto_js_1.default.enc.Utf8.parse(envParams.hashKey), {
+            iv: crypto_js_1.default.enc.Utf8.parse(envParams.hashIV),
             mode: crypto_js_1.default.mode.CBC,
             padding: crypto_js_1.default.pad.Pkcs7,
         }).toString(crypto_js_1.default.format.Hex);
     }
-    static hashTradeInfo(tradeInfo) {
-        const env = Configuration_1.configuration.getEnvParams();
-        return (0, crypto_js_1.SHA256)(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+    static hashTradeInfo(tradeInfo, envParams) {
+        return (0, crypto_js_1.SHA256)(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
             .toString()
             .toUpperCase();
     }
@@ -114,7 +117,7 @@ class AgreementOrder {
         return this._apiParams.TradeSha;
     }
     apply() {
-        const env = Configuration_1.configuration.getEnvParams();
+        const env = this.getEnvParams();
         const data = {
             properties: {
                 method: 'post',
