@@ -22,8 +22,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyCheckCode = exports.buildCheckCode = exports.hashEncrypted = exports.decryptAes = exports.encryptJson = exports.encryptQueryString = void 0;
 const crypto_js_1 = __importStar(require("crypto-js"));
 const Configuration_1 = require("../Configuration");
-function env() {
-    return Configuration_1.configuration.getEnvParams();
+function resolveCryptoEnv(envParams) {
+    return envParams !== null && envParams !== void 0 ? envParams : Configuration_1.configuration.getEnvParams();
 }
 function toQueryString(data) {
     const params = new URLSearchParams();
@@ -34,8 +34,8 @@ function toQueryString(data) {
     });
     return params.toString();
 }
-function encryptQueryString(data) {
-    const { hashKey, hashIV } = env();
+function encryptQueryString(data, envParams) {
+    const { hashKey, hashIV } = resolveCryptoEnv(envParams);
     return crypto_js_1.AES.encrypt(toQueryString(data), crypto_js_1.default.enc.Utf8.parse(hashKey), {
         iv: crypto_js_1.default.enc.Utf8.parse(hashIV),
         mode: crypto_js_1.default.mode.CBC,
@@ -43,8 +43,8 @@ function encryptQueryString(data) {
     }).toString(crypto_js_1.default.format.Hex);
 }
 exports.encryptQueryString = encryptQueryString;
-function encryptJson(data) {
-    const { hashKey, hashIV } = env();
+function encryptJson(data, envParams) {
+    const { hashKey, hashIV } = resolveCryptoEnv(envParams);
     return crypto_js_1.AES.encrypt(JSON.stringify(data), crypto_js_1.default.enc.Utf8.parse(hashKey), {
         iv: crypto_js_1.default.enc.Utf8.parse(hashIV),
         mode: crypto_js_1.default.mode.CBC,
@@ -52,8 +52,8 @@ function encryptJson(data) {
     }).toString(crypto_js_1.default.format.Hex);
 }
 exports.encryptJson = encryptJson;
-function decryptAes(encrypted) {
-    const { hashKey, hashIV } = env();
+function decryptAes(encrypted, envParams) {
+    const { hashKey, hashIV } = resolveCryptoEnv(envParams);
     const str = crypto_js_1.default.enc.Hex.parse(encrypted);
     const cipherParams = crypto_js_1.default.lib.CipherParams.create({
         ciphertext: str,
@@ -65,13 +65,13 @@ function decryptAes(encrypted) {
     }).toString(crypto_js_1.default.enc.Utf8);
 }
 exports.decryptAes = decryptAes;
-function hashEncrypted(encrypted) {
-    const { hashKey, hashIV } = env();
+function hashEncrypted(encrypted, envParams) {
+    const { hashKey, hashIV } = resolveCryptoEnv(envParams);
     return (0, crypto_js_1.SHA256)(`HashKey=${hashKey}&${encrypted}&HashIV=${hashIV}`).toString().toUpperCase();
 }
 exports.hashEncrypted = hashEncrypted;
-function buildCheckCode(result) {
-    const { hashKey, hashIV } = env();
+function buildCheckCode(result, envParams) {
+    const { hashKey, hashIV } = resolveCryptoEnv(envParams);
     const checkStr = toQueryString({
         Amt: result.Amt,
         MerchantID: result.MerchantID,
@@ -81,7 +81,7 @@ function buildCheckCode(result) {
     return (0, crypto_js_1.SHA256)(`HashIV=${hashIV}&${checkStr}&HashKey=${hashKey}`).toString().toUpperCase();
 }
 exports.buildCheckCode = buildCheckCode;
-function verifyCheckCode(result) {
-    return buildCheckCode(result) === result.CheckCode;
+function verifyCheckCode(result, envParams) {
+    return buildCheckCode(result, envParams) === result.CheckCode;
 }
 exports.verifyCheckCode = verifyCheckCode;

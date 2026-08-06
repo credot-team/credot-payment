@@ -46,6 +46,7 @@ export declare type ResolvedNewebpayEnvironmentParameters = NewebpayEnvironmentP
     tokenQueryApiUrl: string;
     tokenUnbindApiUrl: string;
 };
+export declare function resolveEnv(params: NewebpayEnvironmentParameters): ResolvedNewebpayEnvironmentParameters;
 export declare const configuration: {
     getEnvParams(): ResolvedNewebpayEnvironmentParameters;
     setEnvParams(params: NewebpayEnvironmentParameters): void;

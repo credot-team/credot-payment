@@ -1,3 +1,5 @@
+import { PaidOrderOptions } from '../../PaidOrder';
+import { NewebpayEnvironmentParameters } from '../Configuration';
 import { AgreementBackendResponse, AgreementPnPostData } from './Fields';
 export declare type AgreementPnParams = Omit<AgreementPnPostData, 'TimeStamp' | 'Version' | 'TokenSwitch'>;
 /**
@@ -5,6 +7,8 @@ export declare type AgreementPnParams = Omit<AgreementPnPostData, 'TimeStamp' | 
  */
 export declare class AgreementPn {
     private readonly _params;
-    constructor(params: AgreementPnParams);
+    private readonly _options;
+    constructor(params: AgreementPnParams, options?: PaidOrderOptions<NewebpayEnvironmentParameters>);
+    getEnvParams(): import("../Configuration").ResolvedNewebpayEnvironmentParameters;
     execute(): Promise<AgreementBackendResponse>;
 }

@@ -80,7 +80,9 @@ function resolveApiBase(paymentApiUrl: string): string {
   return paymentApiUrl.replace(/\/MPG\/mpg_gateway\/?$/i, '');
 }
 
-function resolveEnv(params: NewebpayEnvironmentParameters): ResolvedNewebpayEnvironmentParameters {
+export function resolveEnv(
+  params: NewebpayEnvironmentParameters,
+): ResolvedNewebpayEnvironmentParameters {
   const base = resolveApiBase(params.paymentApiUrl);
   return {
     ...params,
