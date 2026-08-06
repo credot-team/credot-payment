@@ -3,10 +3,11 @@ import CryptoJS, { AES, SHA256 } from 'crypto-js';
 import {
   HtmlFormPostParams,
   OrderApplyResult,
+  PaidOrderOptions,
   PaidOrderParams,
 } from '../../PaidOrder';
 import { Locales } from '../../Locales';
-import { configuration } from '../Configuration';
+import { configuration, NewebpayEnvironmentParameters } from '../Configuration';
 import { PoweredBy } from '../';
 import { AgreementOrderTradeInfo } from './Fields';
 
@@ -51,24 +52,33 @@ export type AgreementOrderParams = Omit<
  */
 export class AgreementOrder {
   private readonly _params: AgreementOrderParams;
+  private readonly _options: PaidOrderOptions<NewebpayEnvironmentParameters>;
   private readonly _tradeInfo: AgreementOrderTradeInfo;
   private readonly _apiParams: AgreementOrderApiParams;
 
-  constructor(params: AgreementOrderParams) {
+  constructor(
+    params: AgreementOrderParams,
+    options?: PaidOrderOptions<NewebpayEnvironmentParameters>,
+  ) {
     this._params = { ...params };
+    this._options = options ?? {};
     this._tradeInfo = this.buildTradeInfo();
-    const encryptedTradeInfo = AgreementOrder.encryptTradeInfo(this._tradeInfo);
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
+    const encryptedTradeInfo = AgreementOrder.encryptTradeInfo(this._tradeInfo, env);
     this._apiParams = {
       TradeInfo: encryptedTradeInfo,
-      TradeSha: AgreementOrder.hashTradeInfo(encryptedTradeInfo),
+      TradeSha: AgreementOrder.hashTradeInfo(encryptedTradeInfo, env),
       MerchantID: env.merchantId,
       Version: API_VERSION,
     };
   }
 
+  getEnvParams() {
+    return this._options.env ?? configuration.getEnvParams();
+  }
+
   private buildTradeInfo(): AgreementOrderTradeInfo {
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
     const params = this._params;
     const langType: AgreementOrderTradeInfo['LangType'] =
       params.locale === Locales.en_US ? 'en' : params.locale === Locales.ja ? 'jp' : 'zh-tw';
@@ -102,8 +112,10 @@ export class AgreementOrder {
     };
   }
 
-  static encryptTradeInfo(tradeInfo: AgreementOrderTradeInfo): string {
-    const env = configuration.getEnvParams();
+  static encryptTradeInfo(
+    tradeInfo: AgreementOrderTradeInfo,
+    envParams: NewebpayEnvironmentParameters,
+  ): string {
     const params = new URLSearchParams();
     Object.entries(tradeInfo).forEach(([k, v]) => {
       if (v !== undefined && v !== null) {
@@ -111,16 +123,15 @@ export class AgreementOrder {
       }
     });
     const qs = params.toString();
-    return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(env.hashKey), {
-      iv: CryptoJS.enc.Utf8.parse(env.hashIV),
+    return AES.encrypt(qs, CryptoJS.enc.Utf8.parse(envParams.hashKey), {
+      iv: CryptoJS.enc.Utf8.parse(envParams.hashIV),
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
     }).toString(CryptoJS.format.Hex);
   }
 
-  static hashTradeInfo(tradeInfo: string): string {
-    const env = configuration.getEnvParams();
-    return SHA256(`HashKey=${env.hashKey}&${tradeInfo}&HashIV=${env.hashIV}`)
+  static hashTradeInfo(tradeInfo: string, envParams: NewebpayEnvironmentParameters): string {
+    return SHA256(`HashKey=${envParams.hashKey}&${tradeInfo}&HashIV=${envParams.hashIV}`)
       .toString()
       .toUpperCase();
   }
@@ -150,7 +161,7 @@ export class AgreementOrder {
   }
 
   apply(): Promise<OrderApplyResult> {
-    const env = configuration.getEnvParams();
+    const env = this.getEnvParams();
     const data: HtmlFormPostParams = {
       properties: {
         method: 'post',
